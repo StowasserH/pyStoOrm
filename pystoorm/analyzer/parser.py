@@ -23,4 +23,12 @@ class Parser(object):
                 column = self.con.get_column(table_name, column_name)
                 table.columns[column_name] = column
                 print("    " + column.name + " -> " + str(column.type))
+            # Load relationships (foreign keys)
+            if hasattr(self.con, '_get_foreign_keys'):
+                table.relationships = self.con._get_foreign_keys(table_name)
+                # Mark columns that are foreign keys
+                for rel in table.relationships:
+                    local_col = rel.get('local_column')
+                    if local_col in table.columns:
+                        table.columns[local_col].is_foreign_key = True
         return schema

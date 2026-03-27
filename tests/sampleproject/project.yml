@@ -1,10 +1,26 @@
 connections:
   - connection: classicmodels
-    host: 127.0.0.1
-    password: pystoormpw
-    username: pystoorm
-    database: classicmodels
-    #connector: database.nullconnector.NullConnector #NullConnector
-    connector: database.mysqlconnector.MysqlConnector #NullConnector
+    database: classicmodels.db
+    connector: pystoorm.database.sqliteconnector.SqliteConnector
 
-project: ../tests/sampleproject
+# PROJECT PATHS
+project_root: .
+output_dir: ${project_root}/generated
+
+# OUTPUT TEMPLATES
+# Template paths will be resolved relative to this YAML file's directory
+output:
+  - from: ../templates/python/model.py.template
+    to: ${output_dir}/models/[table].py
+    enabled: true
+    modus: table
+
+  - from: ../templates/python/repository.py.template
+    to: ${output_dir}/repositories/[table]_repository.py
+    enabled: true
+    modus: table
+
+  - from: ../templates/erd/graphviz.template
+    to: ${output_dir}/erd/[connection]_schema.dot
+    enabled: true
+    modus: schema

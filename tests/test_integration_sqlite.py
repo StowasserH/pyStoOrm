@@ -23,6 +23,7 @@ from pystoorm.config.loader import ConfigLoader
 from pystoorm.analyzer.controller import Controller
 from pystoorm.generator.coordinator import Coordinator
 from pystoorm.database.sqliteconnector import SqliteConnector
+import re
 
 
 class TestIntegrationSqlite(unittest.TestCase):
@@ -397,6 +398,282 @@ class TestSqliteConnectorEdgeCases(unittest.TestCase):
         self.assertIn('name', table.column_names)
 
         connector.close()
+
+
+class TestTemplateGeneration(unittest.TestCase):
+    """Test template generation with ERD diagram"""
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up test database and temporary directory"""
+        cls.temp_dir = tempfile.mkdtemp(prefix="pystoorm_template_test_")
+        cls.test_db_path = os.path.join(cls.temp_dir, "test.db")
+        cls.output_dir = os.path.join(cls.temp_dir, "generated")
+
+        # Create test database with sample tables
+        cls._create_test_database(cls.test_db_path)
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up temporary files"""
+        if os.path.exists(cls.temp_dir):
+            shutil.rmtree(cls.temp_dir)
+
+    @staticmethod
+    def _create_test_database(db_path):
+        """Create a test SQLite database with sample schema"""
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+
+        # Create users table
+        cursor.execute("""
+            CREATE TABLE users (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL
+            )
+        """)
+
+        # Create posts table with foreign key
+        cursor.execute("""
+            CREATE TABLE posts (
+                id INTEGER PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                content TEXT,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+        """)
+
+        # Create comments table with foreign keys
+        cursor.execute("""
+            CREATE TABLE comments (
+                id INTEGER PRIMARY KEY,
+                post_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                text TEXT NOT NULL,
+                FOREIGN KEY (post_id) REFERENCES posts(id),
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+        """)
+
+        conn.commit()
+        conn.close()
+
+    @staticmethod
+    def is_valid_graphviz(dot_content):
+        """Check if content is valid Graphviz DOT format.
+
+        Args:
+            dot_content: Content to validate
+
+        Returns:
+            tuple: (is_valid, error_message)
+        """
+        # Basic checks for valid Graphviz syntax
+        if not dot_content.strip():
+            return False, "Empty content"
+
+        # Must start with digraph or graph
+        if not re.search(r'\b(digraph|graph)\b', dot_content):
+            return False, "Missing digraph or graph declaration"
+
+        # Must have opening brace
+        if '{' not in dot_content:
+            return False, "Missing opening brace"
+
+        # Must have closing brace
+        if '}' not in dot_content:
+            return False, "Missing closing brace"
+
+        # Basic bracket matching
+        open_count = dot_content.count('{')
+        close_count = dot_content.count('}')
+        if open_count != close_count:
+            return False, f"Mismatched braces: {open_count} open, {close_count} close"
+
+        return True, None
+
+    def test_erd_template_with_coordinator(self):
+        """Test ERD template generation with Coordinator"""
+        config = {
+            'logging': {'level': 'INFO'},
+            'connections': [{
+                'connection': 'test_db',
+                'database': self.test_db_path,
+                'connector': 'database.sqliteconnector.SqliteConnector'
+            }],
+            'project_root': self.temp_dir,
+            'output_dir': self.output_dir,
+            'naming': {
+                'primary_key': {'patterns': ['^id$']},
+                'table': {'case_in_code': 'PascalCase'}
+            },
+            'style': {
+                'class_naming': {'case': 'PascalCase', 'suffix': 'Model'}
+            },
+            'attribute_hints': {
+                'defaults': ['name', 'title'],
+                'fallback': ['id']
+            },
+            'output': [
+                {
+                    'from': './pystoorm/templates/erd/graphviz.template',
+                    'to': '${output_dir}/erd/[connection]_schema.dot',
+                    'enabled': True,
+                    'modus': 'schema'
+                }
+            ]
+        }
+
+        # Analyze database
+        analyzer = Controller(config)
+        analyzer.walk()
+
+        # Verify schema was parsed
+        self.assertIn('parsedSchema', config['connections'][0])
+        schema = config['connections'][0]['parsedSchema']
+        self.assertEqual(len(schema.table_names), 3)
+
+        # Generate ERD diagram
+        coordinator = Coordinator(config)
+        coordinator.generate()
+
+        # Verify output file was created
+        expected_file = os.path.join(self.output_dir, 'erd', 'test_db_schema.dot')
+        self.assertTrue(os.path.exists(expected_file), f"Expected file not found: {expected_file}")
+
+        # Read and validate content
+        with open(expected_file, 'r') as f:
+            content = f.read()
+
+        # Validate Graphviz syntax
+        is_valid, error_msg = self.is_valid_graphviz(content)
+        self.assertTrue(is_valid, f"Invalid Graphviz content: {error_msg}\n{content}")
+
+    def test_graphviz_content_structure(self):
+        """Test that generated Graphviz contains expected elements"""
+        config = {
+            'logging': {'level': 'INFO'},
+            'connections': [{
+                'connection': 'test_db',
+                'database': self.test_db_path,
+                'connector': 'database.sqliteconnector.SqliteConnector'
+            }],
+            'project_root': self.temp_dir,
+            'output_dir': self.output_dir,
+            'naming': {'primary_key': {'patterns': ['^id$']}},
+            'style': {'class_naming': {'case': 'PascalCase', 'suffix': 'Model'}},
+            'attribute_hints': {'defaults': ['name'], 'fallback': ['id']},
+            'output': [
+                {
+                    'from': './pystoorm/templates/erd/graphviz.template',
+                    'to': '${output_dir}/erd/schema.dot',
+                    'enabled': True,
+                    'modus': 'schema'
+                }
+            ]
+        }
+
+        analyzer = Controller(config)
+        analyzer.walk()
+
+        coordinator = Coordinator(config)
+        coordinator.generate()
+
+        # Read generated file
+        output_file = os.path.join(self.output_dir, 'erd', 'schema.dot')
+        with open(output_file, 'r') as f:
+            content = f.read()
+
+        # Check for table definitions
+        self.assertIn('users', content, "Should contain 'users' table")
+        self.assertIn('posts', content, "Should contain 'posts' table")
+        self.assertIn('comments', content, "Should contain 'comments' table")
+
+        # Check for column types
+        self.assertIn('(PK)', content, "Should contain primary key indicator")
+        self.assertIn('int', content, "Should contain column types")
+
+        # Check for relationships
+        self.assertIn('arrowhead=crow', content, "Should contain relationship arrows")
+
+    def test_multiple_templates(self):
+        """Test that multiple templates can be generated"""
+        config = {
+            'logging': {'level': 'INFO'},
+            'connections': [{
+                'connection': 'test_db',
+                'database': self.test_db_path,
+                'connector': 'database.sqliteconnector.SqliteConnector'
+            }],
+            'project_root': self.temp_dir,
+            'output_dir': self.output_dir,
+            'naming': {'primary_key': {'patterns': ['^id$']}},
+            'style': {'class_naming': {'case': 'PascalCase'}},
+            'attribute_hints': {'defaults': ['name']},
+            'output': [
+                {
+                    'from': './pystoorm/templates/erd/graphviz.template',
+                    'to': '${output_dir}/erd/database.dot',
+                    'enabled': True,
+                    'modus': 'schema'
+                },
+                {
+                    'from': './pystoorm/templates/erd/graphviz.template',
+                    'to': '${output_dir}/erd/database2.dot',
+                    'enabled': True,
+                    'modus': 'schema'
+                }
+            ]
+        }
+
+        analyzer = Controller(config)
+        analyzer.walk()
+
+        coordinator = Coordinator(config)
+        coordinator.generate()
+
+        # Both files should exist
+        file1 = os.path.join(self.output_dir, 'erd', 'database.dot')
+        file2 = os.path.join(self.output_dir, 'erd', 'database2.dot')
+
+        self.assertTrue(os.path.exists(file1), "First template should generate file")
+        self.assertTrue(os.path.exists(file2), "Second template should generate file")
+
+    def test_disabled_template_not_generated(self):
+        """Test that disabled templates are not generated"""
+        config = {
+            'logging': {'level': 'INFO'},
+            'connections': [{
+                'connection': 'test_db',
+                'database': self.test_db_path,
+                'connector': 'database.sqliteconnector.SqliteConnector'
+            }],
+            'project_root': self.temp_dir,
+            'output_dir': self.output_dir,
+            'naming': {'primary_key': {'patterns': ['^id$']}},
+            'style': {'class_naming': {'case': 'PascalCase'}},
+            'attribute_hints': {'defaults': ['name']},
+            'output': [
+                {
+                    'from': './pystoorm/templates/erd/graphviz.template',
+                    'to': '${output_dir}/erd/disabled.dot',
+                    'enabled': False,  # Disabled!
+                    'modus': 'schema'
+                }
+            ]
+        }
+
+        analyzer = Controller(config)
+        analyzer.walk()
+
+        coordinator = Coordinator(config)
+        coordinator.generate()
+
+        # File should NOT exist
+        output_file = os.path.join(self.output_dir, 'erd', 'disabled.dot')
+        self.assertFalse(os.path.exists(output_file), "Disabled template should not generate file")
 
 
 if __name__ == '__main__':

@@ -16,6 +16,7 @@ class Column(object):
         self.length = length
         self.ref_to = []
         self.ref_from = []
+        self.is_foreign_key = False  # Flag to indicate this column is a foreign key
 
     def add_ref_to(self, ref):
         self.ref_to.append(ref)

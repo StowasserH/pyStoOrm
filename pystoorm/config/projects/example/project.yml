@@ -59,7 +59,7 @@ output_dir: ${project_root}/generated/orm
 # OVERRIDE OUTPUT TEMPLATES (optional)
 # Uncomment templates you want to use
 # output:
-#   - from: ./pystoorm/templates/python/model.py
+#   - from: ./pystoorm/templates/python/model.py.template
 #     to: ${output_dir}/models/[table].py
 #     enabled: true
 #     modus: table

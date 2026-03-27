@@ -1,0 +1,10 @@
+digraph database_schema
+{
+    rankdir=LR;
+    node [shape=plaintext];
+    edge [arrowhead=crow];
+
+
+
+    graph [label="classicmodels.db Database Schema", labelloc="top", fontsize="16"];
+}

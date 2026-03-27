@@ -1,12 +1,56 @@
 ## modus: schema
-digraph graphname
+## Generates an Entity-Relationship Diagram in Graphviz DOT format
+digraph database_schema
 {
+    rankdir=LR;
+    node [shape=plaintext];
+    edge [arrowhead=crow];
 
-% for table in schema.table_names:
-    ${table}
+    ## Define all tables as records
+% for table_name in schema.table_names:
+    <%
+        table = schema.tables[table_name]
+        columns = table.columns.values()
+    %>
+    ${table_name} [label=<
+        <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">
+            <TR><TD COLSPAN="2"><B>${table_name}</B></TD></TR>
+            % for column in columns:
+                <%
+                    # Mark primary keys and foreign keys
+                    is_pk = column.key == 'PRI'
+                    is_fk = column.is_foreign_key if hasattr(column, 'is_foreign_key') else False
+                    col_label = column.name
+                    if is_pk:
+                        col_label = '<B>' + col_label + ' (PK)</B>'
+                    elif is_fk:
+                        col_label = '<I>' + col_label + ' (FK)</I>'
+                    type_info = column.type + ('(${column.length})' if column.length > 0 else '')
+                %>
+                <TR><TD ALIGN="LEFT">${col_label}</TD><TD ALIGN="LEFT">${type_info}</TD></TR>
+            % endfor
+        </TABLE>
+    >];
 % endfor
 
-##% for fk in forward_keys:
-##    ${fk[0]} -> ${fk[1]}
-##% endfor
+    ## Define relationships (foreign keys)
+% for table_name in schema.table_names:
+    <%
+        table = schema.tables[table_name]
+    %>
+    % if hasattr(table, 'relationships') and table.relationships:
+        % for rel in table.relationships:
+            <%
+                local_col = rel.get('local_column', '')
+                foreign_table = rel.get('foreign_table', '')
+                foreign_col = rel.get('foreign_column', '')
+            %>
+            ## Foreign key relationship: ${table_name}.${local_col} references ${foreign_table}.${foreign_col}
+            ${foreign_table} -> ${table_name} [label="${local_col}"];
+        % endfor
+    % endif
+% endfor
+
+    ## Graph styling
+    graph [label="${schema.name} Database Schema", labelloc="top", fontsize="16"];
 }

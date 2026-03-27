@@ -12,3 +12,4 @@ class Table(object):
         self.type = type
         self.column_names = column_names
         self.columns = {}
+        self.relationships = []  # List of foreign key relationships

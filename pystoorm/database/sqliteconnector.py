@@ -92,7 +92,20 @@ class SqliteConnector(Connector):
                 db_name = 'memory'
 
             logger.debug(f"Found {len(table_names)} tables: {table_names}")
-            return Schema(db_name, table_names)
+            schema = Schema(db_name, table_names)
+
+            # Populate tables with their columns and relationships
+            for table_name in table_names:
+                table = self.get_table(table_name)
+                # Populate columns
+                for col_name in table.column_names:
+                    col = self.get_column(table_name, col_name)
+                    table.columns[col_name] = col
+                # Get relationships
+                table.relationships = self._get_foreign_keys(table_name)
+                schema.tables[table_name] = table
+
+            return schema
         finally:
             cur.close()
 
@@ -103,7 +116,7 @@ class SqliteConnector(Connector):
             table: Table name
 
         Returns:
-            Table: Table object containing column names
+            Table: Table object containing column names and column details
         """
         cur = self.get_cursor()
         try:
@@ -118,7 +131,17 @@ class SqliteConnector(Connector):
             column_names = [col[1] for col in columns]
             logger.debug(f"Found {len(column_names)} columns in {table}: {column_names}")
 
-            return Table(table, "flat", column_names)
+            table_obj = Table(table, "flat", column_names)
+
+            # Populate column details
+            for col_name in column_names:
+                col = self.get_column(table, col_name)
+                table_obj.columns[col_name] = col
+
+            # Get relationships
+            table_obj.relationships = self._get_foreign_keys(table)
+
+            return table_obj
         finally:
             cur.close()
 
@@ -250,6 +273,40 @@ class SqliteConnector(Connector):
                 return 0
 
         return 0
+
+    def _get_foreign_keys(self, table):
+        """Get all foreign key relationships for a table.
+
+        Args:
+            table: Table name
+
+        Returns:
+            list: List of dicts with foreign key information
+        """
+        cur = self.get_cursor()
+        try:
+            # PRAGMA foreign_key_list returns:
+            # (id, seq, table, from, to, on_delete, on_update, match)
+            query = f"PRAGMA foreign_key_list({table})"
+            cur.execute(query)
+            fks = cur.fetchall()
+
+            relationships = []
+            for fk in fks:
+                rel = {
+                    'local_column': fk[3],      # from column
+                    'foreign_table': fk[2],     # table
+                    'foreign_column': fk[4],    # to column
+                }
+                relationships.append(rel)
+                logger.debug(f"Found FK in {table}: {rel['local_column']} -> {rel['foreign_table']}.{rel['foreign_column']}")
+
+            return relationships
+        except sqlite3.Error as e:
+            logger.debug(f"Could not get foreign keys for {table}: {e}")
+            return []
+        finally:
+            cur.close()
 
     def close(self):
         """Close database connection."""
