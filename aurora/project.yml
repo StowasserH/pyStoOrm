@@ -1,0 +1,10 @@
+connections:
+  - connection: classicmodels
+    host: 192.168.178.75
+    password: lfdkgm92845u5tgm0Z5
+    username: pystoorm
+    database: classicmodels
+    #connector: database.nullconnector.NullConnector #NullConnector
+    connector: database.mysqlconnector.PostgresqlConnector
+
+project: ../aurora

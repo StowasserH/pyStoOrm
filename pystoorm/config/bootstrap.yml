@@ -1,0 +1,13 @@
+connections:
+  -
+
+name: Harald Stowasser
+logLevel: WARN
+
+output:
+  - from: ./templates/python/model.py.template
+    to: ${project}/orm/model/[table].py
+  - from: ./templates/python/model.py
+  - from: ./templates/python/repository.py.template
+  - from: ./templates/erd/graphviz.template
+    to: ${project}/graphviz.dot

@@ -1,0 +1,10 @@
+connections:
+  - connection: classicmodels
+    host: 127.0.0.1
+    password: pystoormpw
+    username: pystoorm
+    database: classicmodels
+    #connector: database.nullconnector.NullConnector #NullConnector
+    connector: database.mysqlconnector.MysqlConnector #NullConnector
+
+project: ../tests/sampleproject

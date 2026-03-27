@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE stoorm [
+        <!ELEMENT stoorm (connection|namespaces|tables|names)*>
+        <!ELEMENT connection (name|host|passwd|user|db)*>
+        <!ELEMENT name (#PCDATA)>
+        <!ELEMENT host (#PCDATA)>
+        <!ELEMENT passwd (#PCDATA)>
+        <!ELEMENT user (#PCDATA)>
+        <!ELEMENT db (#PCDATA)>
+        <!ELEMENT namespaces (repository_type|model_type|store|namespace|class|alternation)*>
+        <!ELEMENT repository_type (#PCDATA)>
+        <!ELEMENT model_type (#PCDATA)>
+        <!ELEMENT store (#PCDATA)>
+        <!ELEMENT namespace (#PCDATA)>
+        <!ELEMENT class (#PCDATA)>
+        <!ELEMENT alternation (table)*>
+        <!ELEMENT table (class)*>
+        <!ATTLIST table
+                name CDATA #REQUIRED>
+        <!ELEMENT tables (#PCDATA)>
+        <!ELEMENT names (zeitstempel|datum|datum_bis|intern|password|passtype|treele|treere|email|treeroot|righttables|url|permalink|geloescht|zustand|nachlader|ip_numbers)*>
+        <!ELEMENT zeitstempel (#PCDATA)>
+        <!ELEMENT datum (#PCDATA)>
+        <!ELEMENT datum_bis (#PCDATA)>
+        <!ELEMENT intern (#PCDATA)>
+        <!ELEMENT password (#PCDATA)>
+        <!ELEMENT passtype (#PCDATA)>
+        <!ELEMENT treele (#PCDATA)>
+        <!ELEMENT treere (#PCDATA)>
+        <!ELEMENT email (#PCDATA)>
+        <!ELEMENT treeroot (#PCDATA)>
+        <!ELEMENT righttables (#PCDATA)>
+        <!ELEMENT url (#PCDATA)>
+        <!ELEMENT permalink (#PCDATA)>
+        <!ELEMENT geloescht (#PCDATA)>
+        <!ELEMENT zustand (#PCDATA)>
+        <!ELEMENT nachlader (#PCDATA)>
+        <!ELEMENT ip_numbers (#PCDATA)>
+        ]>
+<stoorm>
+    <connection>
+        <name>default</name>
+        <host>127.0.0.1</host>
+        <passwd>pystoormpw</passwd>
+        <user>pystoorm</user>
+        <db>pystoormpw</db>
+    </connection>
+
+    <namespaces>
+        <repository_type>Repository</repository_type>
+        <model_type>Model</model_type>
+        <store>./orm/&connection;/&database;/&table;/&class;&type;.php</store>
+        <namespace>/ORM/&Connection;/&Database;/&Table;/&Class;&Type;</namespace>
+        <class>&Class;&Type;</class>
+        <alternation>
+        <table name="websites">
+            <class>Webfun</class>
+        </table>
+        </alternation>
+    </namespaces>
+
+    <tables>
+
+    </tables>
+
+    <names>
+        <zeitstempel>changed</zeitstempel>
+        <datum>create_date</datum>
+        <datum>create_date</datum>
+        <datum_bis>_to</datum_bis>
+        <intern>_intern_</intern>
+        <password>passwd</password>
+        <passtype>SHA1(?)</passtype>
+        <treele>le</treele>
+        <treere>re</treere>
+        <email>email</email>
+        <treeroot>rootid</treeroot>
+        <righttables>profile_permit</righttables>
+        <url>path</url>
+        <permalink>permalink</permalink>
+        <geloescht>wastebasket</geloescht>
+        <zustand>state</zustand>
+        <nachlader>info_</nachlader>
+        <ip_numbers>ip_adress</ip_numbers>
+    </names>
+</stoorm>
+

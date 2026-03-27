@@ -1,0 +1,642 @@
+## modus: table
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+a repository for the Table ${table_name}
+~/old/sdb3_bkup/DATENTR/badische/default-lib/lib/orm/data$
+"""
+class ${table_name} extends DbNode implements DbTool
+{
+  const TABELLENKUERZEL = 'm';
+  const SQLPK           = 'map_id';
+  const SQLID           = 'map_id';
+  const SQLTABELLE      = 'map';
+  const SQLGETTERM      = ' m.map_id AS map_id, m.map_pattern_id AS map_pattern_id, m.map_piece_id AS map_piece_id, m.map_type_id AS map_type_id, m.changed AS changed, m.create_date AS create_date, m.state AS state, m.wastebasket AS wastebasket, m.publish_from AS publish_from, m.publish_to AS publish_to, m.rootid AS rootid, m.le AS le, m.re AS re, m.original AS original';
+  const SQLSET          = 'map_id=?,map_pattern_id=?,map_piece_id=?,map_type_id=?,state=?,wastebasket=?,publish_from=?,publish_to=?,rootid=?,le=?,re=?,original=?';
+  const SQLSETPREP      = 'map_id,map_pattern_id,map_piece_id,map_type_id,state,wastebasket,publish_from,publish_to,rootid,le,re,original';
+  const SQLSTRKEY       = '';
+  const DATATYPES       = 'iiiissssiiis';
+  const SQLCOUNTER      =14;
+  const SQLAKTUELLE="1";
+  const SQLAUSSCHLUSS="m.wastebasket='Nein'";
+  const SQLANGEZEIGTE="m.wastebasket='Nein' AND m.state='Angezeigt' AND  NOW() between m.publish_from AND m.publish_to";
+  /**
+   * Fields deffinition.
+   */
+  const posMap_id=0;
+  const posMap_pattern_id=1;
+  const posMap_piece_id=2;
+  const posMap_type_id=3;
+  const posChanged=4;
+  const posCreate_date=5;
+  const posState=6;
+  const posWastebasket=7;
+  const posPublish_from=8;
+  const posPublish_to=9;
+  const posRootid=10;
+  const posLe=11;
+  const posRe=12;
+  const posOriginal=13;
+
+  public static function getTABELLENKUERZEL(){return self::TABELLENKUERZEL;}
+  public static function getSQLPK          (){return self::SQLPK          ;}
+  public static function getSQLID          (){return self::SQLID          ;}
+  public static function getSQLTABELLE     (){return self::SQLTABELLE     ;}
+  public static function getSQLGETTERM     (){return self::SQLGETTERM     ;}
+  public static function getSQLSET         (){return self::SQLSET         ;}
+  public static function getSQLSETPREP     (){return self::SQLSETPREP     ;}
+  public static function getSQLAUSSCHLUSS  (){return self::SQLAUSSCHLUSS  ;}
+  public static function getSQLANGEZEIGTE  (){return self::SQLANGEZEIGTE  ;}
+  public static function getSQLAKTUELLE    (){return self::SQLAKTUELLE    ;}
+  public static function getSQLCOUNTER     (){return self::SQLCOUNTER     ;}
+  public static function getSQLSTRKEY      (){return self::SQLSTRKEY     ;}
+  public static function getDATATYPES      (){return self::DATATYPES      ;}
+  public static function getSQLTABLESH     (){return self::getDbStr(). self::SQLTABELLE . ' '.self::TABELLENKUERZEL;}
+  public static function getSQLGET         (){return 'SELECT '.self::SQLGETTERM.' FROM '.self::getSQLTABLESH();}
+  public function getTable() {return self::getDbStr(). self::SQLTABELLE;}
+  public function isPublished( ) {
+    $utm=new UnixTimestampModifier();
+    $now= time();
+    return $this->getPublish_from($utm) < $now && $this->getPublish_to($utm) > $now;
+  }
+  /* Gibt zurück ob die Tabelle Löschbar ist. (enthält geloescht und gesperrt!) @return true=Löschbar! */
+  public static function isWasteable() {return true;}
+  /* Gibt zurück ob die Tabelle einen Timestamp hat @return true=Tabelle hat einen Timestamp! */
+  public static function isTimestamped() {return true;}
+  /**
+   * Gibt die ID zurück. Klassen übergreifend!
+   * Wenn der Datensatz noch nicht in der DB ist, dann wird temp_id zurückgegeben
+   * temp_id wird durch setID oder durch write() gesetzt!
+   * @return int mit der ID
+   */
+  public function getID()
+  {
+    $ret= $this->getMap_id();
+    if ($ret == 0){ $ret=$this->temp_id; }
+    return $ret;
+  }
+  /**
+   * Gibt die ID der Datenbank zurück!
+   * Wenn der Datensatz noch nicht in der DB ist, dann wird 0 zurückgegeben
+   * @return int mit der ID
+   */
+  public function getDBID()
+  {
+    return $this->getMap_id();
+  }
+  /* Gibt die Eigenschaft zurück. @return int map_id */
+  public function getMap_id($mod = null) {return $this->intGetter(self::posMap_id,$mod);}
+  /*  Setzt die Eigenschaft.  @param int map_id */
+  public function setMap_id( $map_id,$dontparse=false) {$this->intSetter(self::posMap_id,$map_id,$dontparse);}
+  /* Gibt die Eigenschaft zurück. @return int map_pattern_id */
+  public function getMap_pattern_id($mod = null) {return $this->intGetter(self::posMap_pattern_id,$mod);}
+  /*  Setzt die Eigenschaft.  @param int map_pattern_id */
+  public function setMap_pattern_id( $map_pattern_id,$dontparse=false) {$this->intNullSetter(self::posMap_pattern_id,$map_pattern_id,$dontparse);}
+  /**
+   * Sucht den verknüpften Datensatz aus der Datenbank!
+   * @return Datensatz der venknüpft ist.
+   */
+  public function getDataMap_pattern()
+  {
+    return new Map_pattern( intval($this->getMap_pattern_id()) );
+  }
+  /* Gibt die Eigenschaft zurück. @return int map_piece_id */
+  public function getMap_piece_id($mod = null) {return $this->intGetter(self::posMap_piece_id,$mod);}
+  /*  Setzt die Eigenschaft.  @param int map_piece_id */
+  public function setMap_piece_id( $map_piece_id,$dontparse=false) {$this->intNullSetter(self::posMap_piece_id,$map_piece_id,$dontparse);}
+  /**
+   * Sucht den verknüpften Datensatz aus der Datenbank!
+   * @return Datensatz der venknüpft ist.
+   */
+  public function getDataMap_piece()
+  {
+    return new Map_piece( intval($this->getMap_piece_id()) );
+  }
+  /* Gibt die Eigenschaft zurück. @return int map_type_id */
+  public function getMap_type_id($mod = null) {return $this->intGetter(self::posMap_type_id,$mod);}
+  /*  Setzt die Eigenschaft.  @param int map_type_id */
+  public function setMap_type_id( $map_type_id,$dontparse=false) {$this->intNullSetter(self::posMap_type_id,$map_type_id,$dontparse);}
+  /**
+   * Sucht den verknüpften Datensatz aus der Datenbank!
+   * @return Datensatz der venknüpft ist.
+   */
+  public function getDataMap_type()
+  {
+    return new Map_type( intval($this->getMap_type_id()) );
+  }
+  /* Gibt die Eigenschaft zurück. @return String changed */
+  public function getChanged($mod = null, $format = null){return $this->dateGetter(self::posChanged,$mod, $format );}
+  /*  Setzt die Eigenschaft.  @param String changed */
+  private function setChanged( $changed) {if($changed){ $this->dateSetter(self::posChanged,$changed);}}
+  /* Gibt die Eigenschaft zurück. @return String create_date */
+  public function getCreate_date($mod = null, $format = null){
+   $ret=$this->dateGetter(self::posCreate_date,$mod, $format ,DbObject::NODATE);
+   if (empty($ret)) $ret= DbObject::NODATE;
+   return $ret;
+  }
+  /*  Setzt die Eigenschaft.  @param String create_date */
+  private function setCreate_date( $create_date) {if($create_date){ $this->dateSetter(self::posCreate_date,$create_date);}}
+  /* Gibt die Eigenschaft zurück. @return String state */
+  public function getState($mod = null){
+   $ret=$this->stringGetter(self::posState,$mod);
+   if (empty($ret)) $ret= 'Angezeigt';
+   return $ret;
+  }
+  /*  Setzt die Eigenschaft.  @param String state */
+  public function setState( $state) {$this->stringSetter(self::posState,$state);}
+  /**
+   * holt alle Enum-Typen.
+   * @return String mit den Namen im Html-format!
+   * @param String aktuell ist die vorselektierung
+   */
+  public static function getEnumState()
+  {
+    $voreinstellung=0;
+    if(func_num_args()>0){
+      $voreinstellung=func_get_arg(0);
+    }
+    $conn=core_database::getConnection('READ');
+    $ausgabe = array();
+    try{
+      $stmt =$conn->query('DESC '. self::getDbStr().'map state ');
+      $result = $stmt->setFetchMode(PDO::FETCH_NUM);
+      $row = $stmt->fetchAll();
+      $row=$row[0];
+      $daten=explode("'",$row[1]);
+      $len=count($daten)-1;
+      for ($count=1;$count < $len ;$count=$count+2)
+      {
+        array_push($ausgabe, DbObject::ENUM1.$daten[$count]."\"");
+        if ($voreinstellung!==0 ){
+          if ($daten[$count]==$voreinstellung){
+            array_push($ausgabe, DbObject::ENUM2);
+          }
+        }
+        array_push($ausgabe,">" . htmlentities ($daten[$count]) . DbObject::ENUM3);
+      }
+    }catch(Exception $e){
+       throw($e);
+    }
+    return implode('', $ausgabe);
+  }
+  /* Gibt die Eigenschaft zurück. @return String wastebasket */
+  public function getWastebasket($mod = null){
+   $ret=$this->stringGetter(self::posWastebasket,$mod);
+   if (empty($ret)) $ret= 'Nein';
+   return $ret;
+  }
+  /*  Setzt die Eigenschaft.  @param String wastebasket */
+  public function setWastebasket( $wastebasket) {$this->stringSetter(self::posWastebasket,$wastebasket);}
+  /**
+   * holt alle Enum-Typen.
+   * @return String mit den Namen im Html-format!
+   * @param String aktuell ist die vorselektierung
+   */
+  public static function getEnumWastebasket()
+  {
+    $voreinstellung=0;
+    if(func_num_args()>0){
+      $voreinstellung=func_get_arg(0);
+    }
+    $conn=core_database::getConnection('READ');
+    $ausgabe = array();
+    try{
+      $stmt =$conn->query('DESC '. self::getDbStr().'map wastebasket ');
+      $result = $stmt->setFetchMode(PDO::FETCH_NUM);
+      $row = $stmt->fetchAll();
+      $row=$row[0];
+      $daten=explode("'",$row[1]);
+      $len=count($daten)-1;
+      for ($count=1;$count < $len ;$count=$count+2)
+      {
+        array_push($ausgabe, DbObject::ENUM1.$daten[$count]."\"");
+        if ($voreinstellung!==0 ){
+          if ($daten[$count]==$voreinstellung){
+            array_push($ausgabe, DbObject::ENUM2);
+          }
+        }
+        array_push($ausgabe,">" . htmlentities ($daten[$count]) . DbObject::ENUM3);
+      }
+    }catch(Exception $e){
+       throw($e);
+    }
+    return implode('', $ausgabe);
+  }
+  /* Gibt die Eigenschaft zurück. @return String publish_from */
+  public function getPublish_from($mod = null, $format = null){
+   $ret=$this->dateGetter(self::posPublish_from,$mod, $format ,DbObject::MINDATE);
+   if (empty($ret)) $ret= DbObject::MINDATE;
+   return $ret;
+  }
+  /*  Setzt die Eigenschaft.  @param String publish_from */
+  public function setPublish_from( $publish_from) {$this->dateSetter(self::posPublish_from,$publish_from);}
+  /* Gibt die Eigenschaft zurück. @return String publish_to */
+  public function getPublish_to($mod = null, $format = null){
+   $ret=$this->dateGetter(self::posPublish_to,$mod, $format ,DbObject::MAXDATE);
+   if (empty($ret)) $ret= DbObject::MAXDATE;
+   return $ret;
+  }
+  /*  Setzt die Eigenschaft.  @param String publish_to */
+  public function setPublish_to( $publish_to) {$this->dateSetter(self::posPublish_to,$publish_to);}
+  /* Gibt die Eigenschaft zurück. @return int rootid */
+  public function getRootid($mod = null) {return $this->intGetter(self::posRootid,$mod);}
+  /*  Setzt die Eigenschaft.  @param int rootid */
+  public function setRootid( $rootid,$dontparse=false) {$this->intSetter(self::posRootid,$rootid,$dontparse);}
+  /* Gibt die Eigenschaft zurück. @return int le */
+  public function getLe($mod = null) {return $this->intGetter(self::posLe,$mod);}
+  /*  Setzt die Eigenschaft.  @param int le */
+  public function setLe( $le,$dontparse=false) {$this->intSetter(self::posLe,$le,$dontparse);}
+  /* Gibt die Eigenschaft zurück. @return int re */
+  public function getRe($mod = null) {return $this->intGetter(self::posRe,$mod);}
+  /*  Setzt die Eigenschaft.  @param int re */
+  public function setRe( $re,$dontparse=false) {$this->intSetter(self::posRe,$re,$dontparse);}
+  /* Gibt die Eigenschaft zurück. @return String original */
+  public function getOriginal($mod = null){
+   $ret=$this->stringGetter(self::posOriginal,$mod);
+   if (empty($ret)) $ret= 'Nein';
+   return $ret;
+  }
+  /*  Setzt die Eigenschaft.  @param String original */
+  public function setOriginal( $original) {$this->stringSetter(self::posOriginal,$original);}
+  /**
+   * holt alle Enum-Typen.
+   * @return String mit den Namen im Html-format!
+   * @param String aktuell ist die vorselektierung
+   */
+  public static function getEnumOriginal()
+  {
+    $voreinstellung=0;
+    if(func_num_args()>0){
+      $voreinstellung=func_get_arg(0);
+    }
+    $conn=core_database::getConnection('READ');
+    $ausgabe = array();
+    try{
+      $stmt =$conn->query('DESC '. self::getDbStr().'map original ');
+      $result = $stmt->setFetchMode(PDO::FETCH_NUM);
+      $row = $stmt->fetchAll();
+      $row=$row[0];
+      $daten=explode("'",$row[1]);
+      $len=count($daten)-1;
+      for ($count=1;$count < $len ;$count=$count+2)
+      {
+        array_push($ausgabe, DbObject::ENUM1.$daten[$count]."\"");
+        if ($voreinstellung!==0 ){
+          if ($daten[$count]==$voreinstellung){
+            array_push($ausgabe, DbObject::ENUM2);
+          }
+        }
+        array_push($ausgabe,">" . htmlentities ($daten[$count]) . DbObject::ENUM3);
+      }
+    }catch(Exception $e){
+       throw($e);
+    }
+    return implode('', $ausgabe);
+  }
+  /**
+   * Lädt den aktuellen Datensatz aus der DB.
+   * @param int map_id
+   */
+  public function read( $map_id,$conn , $isKey=false){
+    if (is_string( $map_id)){
+      $sql = $this->getSQLGET().' WHERE '.$map_id;
+      $stmt =$conn->query($sql);
+      $result = $stmt->setFetchMode(PDO::FETCH_NUM);
+      $result = $stmt->fetchAll();
+    }else{
+      if ( ! isset ($conn->preparedGetbyID_map)){
+        $sql = $this->getSQLGET().' WHERE map_id=?';
+        $conn->preparedGetbyID_map=$conn->prepare($sql);
+        $conn->preparedGetbyID_map->setFetchMode(PDO::FETCH_NUM);
+      }
+      $conn->preparedGetbyID_map->bindParam(1, $map_id, PDO::PARAM_INT);
+      if ( ! $conn->preparedGetbyID_map->execute()){
+        throw new EDbObject (10009, $map_id);
+      }
+      $result=$conn->preparedGetbyID_map->fetchAll();
+    }
+    if (count($result)==0){
+      throw new EDbObject (10007,$map_id);
+    }elseif (count($result)>1){
+      throw new EDbObject (10008,$map_id);
+    }
+    $this->getFromSql( $result[0]);
+  }
+  /**
+   * Hilfsfunktion zum Aufbau des Optimistik-lock
+   */
+  private function mkOptitest($connection) {
+    $sql = "SELECT map_id FROM ". $this->getDbStr()."map WHERE map_id=? AND changed=?";
+    $connection->preparedOptitest_map=$connection->prepare($sql);
+    $connection->preparedOptitest_map->setFetchMode(PDO::FETCH_NUM);
+  }
+  /**
+   * Hilfsfunktion zum Aufbau des Optimistik-lock
+   */
+  private function checkLock($dbid,$timestamp,$connection){
+    if( ! $this->skipOptimisticLock){
+      if ( ! isset ($connection->preparedOptitest_map)) $this->mkOptitest($connection);
+      $connection->preparedOptitest_map->bindParam(1, $dbid, PDO::PARAM_INT);
+      $connection->preparedOptitest_map->bindParam(2, $timestamp , PDO::PARAM_STR  );
+      $connection->preparedOptitest_map->execute();
+      if ( count( $connection->preparedOptitest_map->fetchAll() ) != 1 ){
+        throw new EDbObject(10010);
+      }
+    }
+  }
+  /**
+   * Hilfsfunktion zum Insert
+   */
+  private function mkInsert($connection) {
+    $sql = "INSERT INTO ". $this->getDbStr()."map (" . self::SQLSETPREP . ",create_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,now() )";
+    if (! $connection->preparedInsert_map=$connection->prepare($sql)) throw new EDbObject(10011);;
+    $connection->preparedInsert_map->setFetchMode(PDO::FETCH_NUM);
+  }
+  /**
+   * Hilfsfunktion zum Update
+   */
+  private function mkUpdate($connection) {
+    $sql = "UPDATE ". $this->getDbStr()."map SET ".self::SQLSET." WHERE map_id=?";
+    if (! $connection->preparedUpdate_map=$connection->prepare($sql)) throw new EDbObject(10012);
+    $connection->preparedUpdate_map->setFetchMode(PDO::FETCH_NUM);
+  }
+  /**
+   * Schreibt den Datensatz in die Datenbank
+   * @param connection ist die Connection in die geschrieben wird!
+   */
+  public function write($connection)
+  {
+    if ( ! $this->isChanged() ) return;
+    if( is_null($connection)){
+      throw new EDbObject(10013);
+    }
+    $dbid=$this->getDBID();
+    $locked=false;
+    $error=null;
+    try{
+      // das Optimistic-Locking:
+      $timestamp=$this->getChanged(new SqlDateModifier());
+      if ( strlen($timestamp) > 1 && $dbid != 0){
+        $locked=true;
+        if ( ! isset ($connection->preparedLockInno_map)){
+          $sql='SELECT map_id FROM '.$this->getDbStr( ) .'map WHERE map_id=? FOR UPDATE';
+          if (! $connection->preparedLockInno_map=$connection->prepare($sql)) throw new EDbObject(10012);
+          $connection->preparedLockInno_map->setFetchMode(PDO::FETCH_NUM);
+        }
+        $connection->preparedLockInno_map->bindParam(1, $dbid, PDO::PARAM_INT);
+        $connection->preparedLockInno_map->execute();
+        $dummy = $connection->preparedLockInno_map->fetchAll();
+        $dummy=null;
+        $stmt=null;
+        $this->checkLock($dbid,$timestamp,$connection);
+      }
+      if ($this->getLe()==0)
+        {$this->einfuegen($connection);}
+      if ( $dbid == 0 ){
+        if ( ! isset ($connection->preparedInsert_map)) $this->mkInsert($connection);
+        $bindto=$connection->preparedInsert_map;
+      } else {
+        if ( ! isset ($connection->preparedUpdate_map)) $this->mkUpdate($connection);
+        $bindto=$connection->preparedUpdate_map;
+      }
+      $val=$this->getMap_id();
+      if (is_null($val)) $val=0;
+      $bindto->bindValue(1,$val,PDO::PARAM_INT);
+      $val=$this->getMap_pattern_id();
+      $bindto->bindValue(2, $val,is_null($val)?PDO::PARAM_NULL:PDO::PARAM_INT);
+      $val=$this->getMap_piece_id();
+      $bindto->bindValue(3, $val,is_null($val)?PDO::PARAM_NULL:PDO::PARAM_INT);
+      $val=$this->getMap_type_id();
+      $bindto->bindValue(4, $val,is_null($val)?PDO::PARAM_NULL:PDO::PARAM_INT);
+      $val=$this->getState();
+      if (empty($val)) $val='Angezeigt';
+      $bindto->bindValue(5,$val,PDO::PARAM_STR);
+      $val=$this->getWastebasket();
+      if (empty($val)) $val='Nein';
+      $bindto->bindValue(6,$val,PDO::PARAM_STR);
+      $dat=$this->getPublish_from(new SqlDateModifier());
+      if ( strlen( $dat )<2)
+      {
+        $dat=DbObject::MINDATE;
+      }
+      $bindto->bindValue(7,$dat , PDO::PARAM_STR);
+      $dat=$this->getPublish_to(new SqlDateModifier());
+      if ( strlen( $dat )<2)
+      {
+        $dat=DbObject::MAXDATE;
+      }
+      $bindto->bindValue(8,$dat , PDO::PARAM_STR);
+      $val=$this->getRootid();
+      if (is_null($val)) $val=0;
+      $bindto->bindValue(9,$val,PDO::PARAM_INT);
+      $val=$this->getLe();
+      if (is_null($val)) $val=0;
+      $bindto->bindValue(10,$val,PDO::PARAM_INT);
+      $val=$this->getRe();
+      if (is_null($val)) $val=0;
+      $bindto->bindValue(11,$val,PDO::PARAM_INT);
+      $val=$this->getOriginal();
+      if (empty($val)) $val='Nein';
+      $bindto->bindValue(12,$val,PDO::PARAM_STR);
+      if ( $dbid == 0 ){
+        $bindto->execute();
+        $this->temp_id=$connection->lastInsertId();
+        $this->daten[self::posMap_id]= $this->temp_id;
+      } else {
+        $bindto->bindParam(13, $dbid,PDO::PARAM_INT);
+        $bindto->execute();
+      }
+      if ($this->getRootid()==0 && $this->getLe()==1){
+        $connection->exec("UPDATE ". $this->getDbStr()."map SET rootid=map_id WHERE map_id=".$this->getDBID());
+        $this->setRootid($this->getDBID());
+      }
+      $this->ObChanged=false;
+    }catch(Exception $e){
+       $error=$e;
+    }
+    if($locked==true){
+      //nothing to do in innodb.
+    }
+    if ($error){ throw($error);}
+    $this->skipOptimisticLock=false;
+  }
+  /**
+   * Die toString Methode gibt die Datenbank ids und die Tabelle zurück!
+   * @return ein überblick über den Speicherort.
+   */
+  public function __toString()
+  {
+      return("<map id=".$this->getID().">");
+  }
+  protected function cp($map)
+  {
+    $this->setMap_id($map->getMap_id());
+    $this->setMap_pattern_id($map->getMap_pattern_id());
+    $this->setMap_piece_id($map->getMap_piece_id());
+    $this->setMap_type_id($map->getMap_type_id());
+    $this->setChanged($map->getChanged());
+    $this->setCreate_date($map->getCreate_date());
+    $this->setState($map->getState());
+    $this->setWastebasket($map->getWastebasket());
+    $this->setPublish_from($map->getPublish_from());
+    $this->setPublish_to($map->getPublish_to());
+    $this->setRootid($map->getRootid());
+    $this->setLe($map->getLe());
+    $this->setRe($map->getRe());
+    $this->setOriginal($map->getOriginal());
+  }
+  protected function cp2($map)
+  {
+    $this->setMap_pattern_id($map->getMap_pattern_id());
+    $this->setMap_piece_id($map->getMap_piece_id());
+    $this->setMap_type_id($map->getMap_type_id());
+    $this->setState($map->getState());
+    $this->setWastebasket($map->getWastebasket());
+    $this->setPublish_from($map->getPublish_from());
+    $this->setPublish_to($map->getPublish_to());
+    $this->setRootid($map->getRootid());
+    $this->setLe($map->getLe());
+    $this->setRe($map->getRe());
+    $this->setOriginal($map->getOriginal());
+  }
+  /**
+   * Objektdaten in ein neues Objekt kopieren!
+   * Kopiert alles! Auch die Objekt_id!
+   */
+  public function copyObject(Map $o)
+  {
+    if (!($o instanceof Map)) throw new EDbObject(10015,"Map");
+    $this->cp( $o );
+  }
+  /**
+   * Objektdaten in ein neues Objekt kopieren!
+   * Die Ids werden nicht mitkopiert! Es entsteht also nur ein geklontes Objekt!
+   */
+  public function cloneObject(Map $o)
+  {
+    if (!($o instanceof Map)) throw new EDbObject(10015,"Map");
+    $this->cp2( $o );
+  }
+  /**
+   * Konstruktoren!
+   */
+  public function __construct()
+  {
+
+    if(func_num_args()==0){
+    $this->ObChanged=false;
+    $this->state='".DbObject::ANGEZEIGT."';
+    $this->wastebasket='".DbObject::NEIN."';
+    } elseif(func_num_args()==1) {
+      $arg=func_get_arg(0);
+      if ($arg instanceof Map){
+        // Der copy-Konstruktor
+        $this->cp($arg);
+        $this->ObChanged=$arg->isChanged();
+      } elseif (is_int($arg)){
+        // Instance aus der Id.
+        $this->singleRead($arg);
+      } elseif (is_array($arg)){
+        // Instance aus einem Array.
+        $this->getFromSql($arg);
+      } elseif (is_string($arg)){
+        // Instance mit einem Where-teil.
+        $this->singleRead($arg);
+      }
+    } elseif(func_num_args()==2) {
+      $arg=func_get_arg(0);
+      if (is_string($arg)){
+        // Instance mit einem Where-teil.
+        $isKey=func_get_arg(1);
+        $this->singleRead($arg,$isKey==true);
+      }elseif (is_array($arg)){
+        // Instance aus einem ResultSet mit Offset.
+        $offset=func_get_arg(1);
+        $this->getFromSql($arg,$offset);
+      }
+    } elseif(func_num_args()==12) {
+      $this->daten=array(func_get_arg(0),func_get_arg(1),func_get_arg(2),func_get_arg(3),func_get_arg(4),func_get_arg(5),func_get_arg(6),func_get_arg(7),func_get_arg(8),func_get_arg(9),func_get_arg(10),func_get_arg(11));
+    }
+    parent::__construct();
+  }
+  /**
+   * Das Wakeup überladen, damit eventuelle Varialblen wie
+   * wird nichts übergeben, wird post benutzt
+   */
+  function __wakeup() {
+
+  }
+  /**
+   * Das Objekt wird aus einem Assoziativen Array befüllt
+   * wird nichts übergeben, wird post benutzt
+   */
+  public function setFromArray()
+  {
+    if(func_num_args()==0){
+      $arr=$_POST;
+    }else{
+      $arr=func_get_arg(0);
+    }
+    $strip= (get_magic_quotes_gpc()==1 && ($arr===$_POST || $arr===$_GET || $arr===$_COOKIE));
+    $changedfield=false;
+    foreach ( explode(',',self::SQLSETPREP) as $value )
+    {
+      $key=$this->prefix.$value;
+      if (array_key_exists($key, $arr)){
+        switch ($value){
+            case 'map_id':
+               $this->setMap_id( ($strip ? stripslashes($arr[$key]):$arr[$key] ) );
+               $changedfield=true;
+              break;
+            case 'map_pattern_id':
+               $this->setMap_pattern_id( ($strip ? stripslashes($arr[$key]):$arr[$key] ) );
+               $changedfield=true;
+              break;
+            case 'map_piece_id':
+               $this->setMap_piece_id( ($strip ? stripslashes($arr[$key]):$arr[$key] ) );
+               $changedfield=true;
+              break;
+            case 'map_type_id':
+               $this->setMap_type_id( ($strip ? stripslashes($arr[$key]):$arr[$key] ) );
+               $changedfield=true;
+              break;
+            case 'state':
+               $this->setState( ($strip ? stripslashes($arr[$key]):$arr[$key] ) );
+               $changedfield=true;
+              break;
+            case 'wastebasket':
+               $this->setWastebasket( ($strip ? stripslashes($arr[$key]):$arr[$key] ) );
+               $changedfield=true;
+              break;
+            case 'publish_from':
+               $this->setPublish_from( ($strip ? stripslashes($arr[$key]):$arr[$key] ) );
+               $changedfield=true;
+              break;
+            case 'publish_to':
+               $this->setPublish_to( ($strip ? stripslashes($arr[$key]):$arr[$key] ) );
+               $changedfield=true;
+              break;
+            case 'rootid':
+               $this->setRootid( ($strip ? stripslashes($arr[$key]):$arr[$key] ) );
+               $changedfield=true;
+              break;
+            case 'le':
+               $this->setLe( ($strip ? stripslashes($arr[$key]):$arr[$key] ) );
+               $changedfield=true;
+              break;
+            case 're':
+               $this->setRe( ($strip ? stripslashes($arr[$key]):$arr[$key] ) );
+               $changedfield=true;
+              break;
+            case 'original':
+               $this->setOriginal( ($strip ? stripslashes($arr[$key]):$arr[$key] ) );
+               $changedfield=true;
+              break;
+        }
+      }
+    }
+    return $changedfield;
+  }
+
+
+}

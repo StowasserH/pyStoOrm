@@ -1,0 +1,12 @@
+## modus: schema
+digraph graphname
+{
+
+% for table in schema.table_names:
+    ${table}
+% endfor
+
+##% for fk in forward_keys:
+##    ${fk[0]} -> ${fk[1]}
+##% endfor
+}

@@ -1,0 +1,4 @@
+clint>=0.5.1
+mysql-connector-python>=8.0.33
+PyYAML>=6.0
+Mako>=1.2.4

@@ -1,0 +1,10 @@
+## modus: table
+## modus: schema
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+a model for the Table ${camel_case(table_name)}
+"""
+class ${underscored(table_name+" Model")}(Model):
+    row=[]
+

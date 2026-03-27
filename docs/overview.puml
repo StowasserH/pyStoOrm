@@ -1,0 +1,74 @@
+@startuml
+skinparam DefaultTextAlignment center
+skinparam arrowColor #000000
+skinparam rectangleBackgroundColor #CFE2F3
+skinparam fileBackgroundColor #CFE2F3
+skinparam databaseBackgroundColor #CFE2F3
+skinparam defaultFontSize 18
+
+title Architecture overview
+scale 0.5
+left to right direction
+
+package "Project" as Project {
+    database "Database" as db
+    File "Language\nTemplates" as modules
+    rectangle "Repository" as Repository {
+        File "Rep1" as Rep1
+        File "RepX..." as RepX
+    }
+    rectangle "Model" as Model {
+        File "Mod1" as Mod1
+        File "ModX..." as ModX
+    }
+    Rep1 --> Mod1
+    RepX --> ModX
+    rectangle "Project Config" as bConfProj
+}
+
+package "pyStoOrm" as pyStoOrm {
+    rectangle "Analyser" as Analyser{
+        rectangle Controller
+        rectangle Tokenizer
+        rectangle dbConector
+        rectangle dbParser
+        controller -> dbConector : starts
+        dbConector -> db : connects to
+        controller -> dbParser : feeds
+        dbParser -> Tokenizer : feeds
+    }
+
+    rectangle "dbComposition" as dbComposition{
+        rectangle dbTable
+        rectangle dbColumn
+        rectangle dbType
+        dbTable -> dbColumn
+        dbColumn -> dbType
+    }
+    rectangle "Generator" as Generator{
+        rectangle GeneratorController
+        rectangle TreeWalker
+        rectangle TemplateParser
+        rectangle RepositoryWriter
+        rectangle ModelWriter
+        GeneratorController -> TreeWalker
+        TreeWalker -> TemplateParser
+        GeneratorController -> RepositoryWriter
+        GeneratorController -> ModelWriter
+    }
+    rectangle "Templates" as Templates {
+        File "Modul Templates" as mod
+        File "Repository Templates" as rep
+    }
+    rectangle "Config" as Config{
+        rectangle "Bootstrap\nConfig" as bConf
+        rectangle "Config\nreader" as bConfRead
+        bConfRead --> bConfProj
+        bConfRead -> bConf
+    }
+}
+Analyser -> dbComposition : creates
+Generator -> Repository : creates
+Generator -> Model : creates
+
+@enduml
