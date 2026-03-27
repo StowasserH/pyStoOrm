@@ -196,5 +196,5 @@ digraph database_schema
             
             productlines -> products [label="productLine"];
 
-    graph [label="/home/stowasserh/Nextcloud/share/work/pyStoOrm/tests/sampleproject/classicmodels.db Database Schema", labelloc="top", fontsize="16"];
+    graph [label="classicmodels.db Database Schema", labelloc="top", fontsize="16"];
 }

@@ -1,222 +1,141 @@
 #!/bin/bash
-# pyStoOrm Sample Project Batch Script
-# This script demonstrates the complete pyStoOrm workflow:
-# 1. Converts MySQL sample data to SQLite
-# 2. Generates ORM models, repositories, and ER-diagrams
-# 3. Shows structure of generated files
+# pyStoOrm Sample Project - Batch Generator
+#
+# This script demonstrates the pyStoOrm workflow:
+# 1. Prepares the SQLite database from SQL file
+# 2. Runs pyStoOrm to generate ORM code
+# 3. Shows the generated structure
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DB_FILE="$SCRIPT_DIR/classicmodels.db"
-GENERATED_DIR="$SCRIPT_DIR/generated"
+SQL_FILE="$SCRIPT_DIR/sqlightsampledatabase.sql"
 PROJECT_YML="$SCRIPT_DIR/project.yml"
+GENERATED_DIR="$SCRIPT_DIR/generated"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-echo "=========================================="
+echo "==========================================="
 echo "pyStoOrm Sample Project - Batch Generator"
-echo "=========================================="
+echo "==========================================="
 echo ""
 
-# Step 1: Remove old database and generated files
-echo "[1/4] Cleaning up old files..."
+# Step 1: Check if SQLite SQL file exists
+echo "[1/3] Preparing SQLite database..."
+
+if [ ! -f "$SQL_FILE" ]; then
+    echo "      ✗ SQLite SQL file not found: $SQL_FILE"
+    echo "      Run: python3 convert_mysql_to_sqlite.py"
+    exit 1
+fi
+
+# Remove old database
 rm -f "$DB_FILE"
-rm -rf "$GENERATED_DIR"
-echo "      ✓ Cleaned"
-echo ""
+echo "      ✓ Cleaned old database"
 
-# Step 2: Create SQLite database from MySQL sample data
-echo "[2/4] Loading MySQL sample data into SQLite..."
-
-python3 << 'SQL_EOF'
+# Create database from SQL file using Python
+python3 << PYTHON_EOF
 import sqlite3
-import re
 
-db_file = 'classicmodels.db'
-sql_file = 'mysqlsampledatabase.sql'
+with open('$SQL_FILE', 'r', encoding='utf-8') as f:
+    sql_content = f.read()
 
 try:
-    with open(sql_file, 'r', encoding='utf-8') as f:
-        content = f.read()
-
-    conn = sqlite3.connect(db_file)
-    conn.isolation_level = None
+    conn = sqlite3.connect('$DB_FILE')
     cursor = conn.cursor()
 
-    # Extract and process CREATE TABLE statements
-    create_table_pattern = r'CREATE TABLE `(\w+)`\s*\((.*?)\)\s*ENGINE'
-    for match in re.finditer(create_table_pattern, content, re.IGNORECASE | re.DOTALL):
-        table_name = match.group(1)
-        table_def = match.group(2)
+    # Execute all SQL statements
+    cursor.executescript(sql_content)
+    conn.commit()
 
-        # Clean column definitions
-        # Remove simple KEY constraints (but keep CONSTRAINT FOREIGN KEY)
-        table_def = re.sub(r',\s*KEY\s+`\w+`\s*\([^)]+\)', '', table_def, flags=re.IGNORECASE)
-
-        # Convert types
-        table_def = re.sub(r'\bint\(\d+\)', 'INTEGER', table_def, flags=re.IGNORECASE)
-        table_def = re.sub(r'\bvarchar\(\d+\)', 'TEXT', table_def, flags=re.IGNORECASE)
-        table_def = re.sub(r'\bdecimal\(\d+,\d+\)', 'REAL', table_def, flags=re.IGNORECASE)
-        table_def = re.sub(r'\b(datetime|date)\b', 'TEXT', table_def, flags=re.IGNORECASE)
-        table_def = re.sub(r'\benum\([^)]*\)', 'TEXT', table_def, flags=re.IGNORECASE)
-
-        # Remove backticks
-        table_def = table_def.replace('`', '')
-        table_name = table_name.replace('`', '')
-
-        sql_stmt = f'CREATE TABLE {table_name} ({table_def})'
-        try:
-            cursor.execute(sql_stmt)
-        except sqlite3.Error as e:
-            pass
-
-    # Process INSERT statements more carefully
-    # Split by "insert into" to find all insert blocks
-    insert_blocks = re.split(r'insert\s+into', content, flags=re.IGNORECASE)
-
-    for block in insert_blocks[1:]:  # Skip first split (before first insert)
-        # Parse the table name and values
-        match = re.match(r'\s+`?(\w+)`?\s*\([^)]+\)\s*values?\s*(.*)', block, re.IGNORECASE | re.DOTALL)
-        if match:
-            table_name = match.group(1)
-            values_str = match.group(2)
-
-            # Extract individual value tuples
-            # This regex finds (val1, val2, ...) patterns
-            value_pattern = r'\((?:[^()]*|(?:\([^()]*\)))*\)'
-            for val_match in re.finditer(value_pattern, values_str):
-                val_tuple = val_match.group(0)
-                # Clean up
-                val_tuple = val_tuple.replace('`', '')
-                insert_stmt = f'INSERT INTO {table_name} VALUES {val_tuple}'
-                try:
-                    cursor.execute(insert_stmt)
-                except sqlite3.Error:
-                    # Continue on error - some inserts may fail
-                    pass
+    # Count tables
+    cursor.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+    table_count = cursor.fetchone()[0]
 
     conn.close()
-
-    # Verify tables
-    conn = sqlite3.connect(db_file)
-    cursor = conn.cursor()
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
-    tables = [row[0] for row in cursor.fetchall()]
-    conn.close()
-
-    print('      ✓ Database created: ' + db_file)
-    print('      ✓ Tables created: ' + str(len(tables)))
-    if tables:
-        print('      ✓ Tables: ' + ', '.join(tables))
-
+    print(f"      ✓ Database created with {table_count} tables")
 except Exception as e:
-    print('      ✗ Error: ' + str(e))
-    import traceback
-    traceback.print_exc()
-    exit(1)
-SQL_EOF
+    print(f"      ✗ Failed to create database: {e}")
+    import sys
+    sys.exit(1)
+PYTHON_EOF
 echo ""
 
-# Step 3: Run pyStoOrm
-echo "[3/4] Running pyStoOrm to generate models and repositories..."
-cd "$SCRIPT_DIR"
+# Step 2: Remove old generated files and generate code
+echo "[2/3] Generating ORM code from schema..."
+rm -rf "$GENERATED_DIR"
 
-# Get the absolute path to the project root
-PROJECT_ROOT="$(cd ../../ && pwd)"
+# Create temporary project.yml with absolute paths for templates
 TEMPLATES_DIR="$PROJECT_ROOT/pystoorm/templates"
+TEMP_YML=$(mktemp)
 
-python3 << PYTHON_EOF
-import sys
-import os
-sys.path.insert(0, '$PROJECT_ROOT')
-
-# Load config
+python3 << YAML_EOF
 import yaml
+import os
 
-config_file = '$PROJECT_YML'
-with open(config_file, 'r') as f:
+with open('$PROJECT_YML', 'r') as f:
     config = yaml.safe_load(f)
 
-# Make paths absolute
-templates_dir = '$TEMPLATES_DIR'
-project_abs_dir = '$SCRIPT_DIR'
-db_path = os.path.join(project_abs_dir, 'classicmodels.db')
+# Make output_dir and template paths absolute
+config['output_dir'] = '$GENERATED_DIR'
 
-# Update database path to absolute
-if 'connections' in config:
-    for conn in config['connections']:
-        if 'database' in conn:
-            rel_db = conn['database']
-            if not os.path.isabs(rel_db):
-                conn['database'] = os.path.join(project_abs_dir, rel_db)
-
-# Update output paths to absolute
-if 'output_dir' in config:
-    output_dir = config['output_dir']
-    if '\${project_root}' in output_dir:
-        config['output_dir'] = output_dir.replace('\${project_root}', project_abs_dir)
-    elif not os.path.isabs(output_dir):
-        config['output_dir'] = os.path.join(project_abs_dir, output_dir)
-
-# Update template paths to absolute
 if 'output' in config:
     for template in config['output']:
         if 'from' in template:
             rel_path = template['from']
             if not os.path.isabs(rel_path):
-                template_name = os.path.basename(rel_path)
-                template_type = os.path.dirname(rel_path).split('/')[-1]
-                abs_path = os.path.join(templates_dir, template_type, template_name)
-                template['from'] = abs_path
-        if 'to' in template:
-            to_path = template['to']
-            if '\${output_dir}' in to_path:
-                template['to'] = to_path.replace('\${output_dir}', config['output_dir'])
-            elif '\${project_root}' in to_path:
-                template['to'] = to_path.replace('\${project_root}', project_abs_dir)
+                # Extract template type and name
+                parts = rel_path.split('/')
+                template_name = parts[-1]
+                template_type = parts[-2]
+                template['from'] = os.path.join('$TEMPLATES_DIR', template_type, template_name)
 
-# Write modified config to temp file
-import tempfile
-with tempfile.NamedTemporaryFile(mode='w', suffix='.yml', delete=False) as f:
+with open('$TEMP_YML', 'w') as f:
     yaml.dump(config, f)
-    temp_config = f.name
+YAML_EOF
 
-sys.argv = ['pystoorm', '--config', temp_config]
+# Run pyStoOrm via CLI with absolute paths
+python3 "$PROJECT_ROOT/pyStoOrm.py" "$TEMP_YML" || {
+    rm -f "$TEMP_YML"
+    echo "      ✗ Code generation failed"
+    exit 1
+}
 
-# Import and run main
-from pystoorm.pystoorm import main
-try:
-    main()
-finally:
-    os.unlink(temp_config)
-PYTHON_EOF
-
-echo "      ✓ Generation complete"
+rm -f "$TEMP_YML"
 echo ""
 
-# Step 4: Show generated structure
-echo "[4/4] Generated files structure:"
+# Step 3: Show generated structure
+echo "[3/3] Generated files structure:"
 echo ""
 
 if [ -d "$GENERATED_DIR" ]; then
-    tree "$GENERATED_DIR" 2>/dev/null || find "$GENERATED_DIR" -type f | sort | sed 's|'"$GENERATED_DIR"'||' | sed 's|^/||' | awk '{print "      " $0}'
+    tree "$GENERATED_DIR" 2>/dev/null || find "$GENERATED_DIR" -type f | sort | sed "s|$GENERATED_DIR||" | sed 's|^/||' | awk '{print "      " $0}'
     echo ""
 
     echo "Summary:"
-    echo "  Models:       $(find $GENERATED_DIR/models -name '*.py' 2>/dev/null | wc -l) files"
-    echo "  Repositories: $(find $GENERATED_DIR/repositories -name '*.py' 2>/dev/null | wc -l) files"
-    echo "  ERD Diagram:  $(find $GENERATED_DIR/erd -name '*.dot' 2>/dev/null | wc -l) files"
+    MODELS=$(find "$GENERATED_DIR/models" -name '*.py' 2>/dev/null | wc -l)
+    REPOS=$(find "$GENERATED_DIR/repositories" -name '*.py' 2>/dev/null | wc -l)
+    BUILDERS=$(find "$GENERATED_DIR/builders" -name '*.py' 2>/dev/null | wc -l)
+    ERD=$(find "$GENERATED_DIR/erd" -name '*.dot' 2>/dev/null | wc -l)
+
+    echo "  Models:       $MODELS files"
+    echo "  Repositories: $REPOS files"
+    echo "  Builders:     $BUILDERS files"
+    echo "  ERD Diagram:  $ERD files"
 else
     echo "      ✗ No generated files found"
 fi
 
 echo ""
-echo "=========================================="
+echo "==========================================="
 echo "✓ Sample project generation complete!"
-echo "=========================================="
+echo "==========================================="
 echo ""
 echo "Next steps:"
 echo "  1. Review generated models in:   $GENERATED_DIR/models/"
 echo "  2. Review generated repositories in: $GENERATED_DIR/repositories/"
-echo "  3. View ER-diagram:              $GENERATED_DIR/erd/"
-echo "  4. Run example_usage.py:         python3 example_usage.py"
+echo "  3. Review generated builders in: $GENERATED_DIR/builders/"
+echo "  4. View ER-diagram:              $GENERATED_DIR/erd/"
+echo "  5. Run example_usage.py:         python3 example_usage.py"
+echo "  6. Run test_sqlbuilder.py:       python3 test_sqlbuilder.py"
 echo ""
