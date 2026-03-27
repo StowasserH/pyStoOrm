@@ -4,7 +4,24 @@
 [![Python](https://img.shields.io/badge/python-3.5%2B-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-**pyStoOrm** is a Python ORM code generator that analyzes your database schema and automatically generates Python ORM classes with a clean, configurable, hierarchical configuration system.
+**pyStoOrm** is a database-first code generator that analyzes your database schema and generates code for **any language, any framework, any pattern**. From Python ORM models to Java entities, TypeScript types, REST APIs, documentation, or custom recordsets—all from a single source of truth: your database.
+
+## 🎯 The Core Idea
+
+**pyStoOrm inverts the traditional ORM approach:**
+
+| Traditional ORMs | pyStoOrm |
+|---|---|
+| Learn a query language | Write SQL or use database tools |
+| ORM abstraction is the "source of truth" | **Your database is the source of truth** |
+| Limited to lowest common denominator across databases | Leverage specific database features (JSON, Window Functions, CTEs, etc.) |
+| One pattern fits all (SQLAlchemy, Django ORM, Prisma) | **Generate any pattern**: ORM, Recordsets, Repositories, DataObjects, etc. |
+| One language: Python/TypeScript/Java/etc. | **Generate any language**: Python, Java, PHP, TypeScript, Go, C#, etc. |
+| Only generates code | **Generates anything**: Code, Documentation, ERD Diagrams, API Specs, etc. |
+
+**No intermediate query language to learn.** Your database schema is the specification. Templates generate the code.
+
+---
 
 ## 🎯 Key Features
 
@@ -12,6 +29,7 @@
 - MySQL
 - PostgreSQL
 - SQLite (perfect for testing)
+- tbd...
 
 ✨ **Smart Configuration System**
 - Hierarchical, layered configuration
@@ -25,11 +43,103 @@
 - Display attributes (which column to show in dropdowns)
 - Template-based output
 
+✨ **Language & Pattern Agnostic**
+- Python ORM Models (Repository, SQLBuilder, Dataclasses)
+- Java/PHP/TypeScript Objects
+- REST API Specifications
+- Database Documentation
+- ERD Diagrams with relationships
+- Custom Recordsets or Query Objects
+- Migrations, Seeds, Fixtures
+- Or create your own pattern!
+
 ✨ **Developer Friendly**
 - 33 comprehensive tests, all passing
 - Well-documented configuration
 - CLI interface
 - Python 3.5+ compatible
+
+---
+
+## 📋 Generate Anything from Your Database
+
+One database. Many outputs. One configuration file.
+
+```yaml
+output:
+  # Python: Repository Pattern with SQL metadata
+  - from: templates/python/repository.py.template
+    to: generated/repositories/[table]_repository.py
+    modus: table
+
+  # Python: SQLBuilder for custom queries
+  - from: templates/python/sqlbuilder.py.template
+    to: generated/builders/[table]_builder.py
+    modus: table
+
+  # TypeScript: API types for frontend
+  - from: templates/typescript/types.ts.template
+    to: generated/api/[table].ts
+    modus: table
+
+  # PHP: Doctrine entities
+  - from: templates/php/entity.php.template
+    to: generated/php/[table].php
+    modus: table
+
+  # Documentation: Schema reference
+  - from: templates/markdown/schema.md.template
+    to: generated/SCHEMA.md
+    modus: schema
+
+  # Visualization: Database diagram
+  - from: templates/graphviz/erd.template
+    to: generated/erd.dot
+    modus: schema
+```
+
+Run once: `python pyStoOrm.py project.yml` → 6 different outputs!
+
+---
+
+## 🗄️ Your Database is the Source of Truth
+
+**You don't learn a new query language.** You use SQL and your database directly.
+
+### Why This Matters
+
+**Traditional ORMs (SQLAlchemy, Django, Prisma):**
+```python
+# Learn the ORM query syntax
+users = User.query.filter(User.age > 18).join(Order).all()
+# Limited to what the ORM can express
+# Can't use database-specific features easily
+```
+
+**pyStoOrm:**
+```python
+# Write actual SQL using generated SQL metadata
+query = f"""
+    SELECT {CustomersRepository.sql_select('c')}
+    FROM {CustomersRepository.SQL_TABLE} c
+    JOIN orders o ON o.customer_id = c.id
+    WHERE c.country = ?
+"""
+cursor.execute(query, ['USA'])
+customers = [Customers._from_row(row) for row in cursor]
+```
+
+**Benefits:**
+- 📚 No new language to learn (you already know SQL)
+- 🚀 Use database-specific features (PostgreSQL window functions, MySQL JSON, Oracle CTEs, etc.)
+- 🎯 Not limited to the "lowest common denominator"
+- 📊 Full access to your database's actual capabilities
+- 🔍 Generated SQL metadata (`SQL_TABLE`, `SQL_COLS`, `SQL_IDX`) for queries
+- 🛠️ Easy to optimize – you write the SQL, not the ORM
+
+### Database Features: Fully Accessible
+
+All without fighting the ORM abstraction.
 
 ---
 
@@ -241,10 +351,71 @@ python3 -m pytest tests/test_basic.py -v
 
 ## 💡 Use Cases
 
+### Polyglot Development (Microservices)
+Generate backend code in different languages from same database:
+
+```yaml
+output:
+  - from: templates/python/repository.py.template
+    to: services/python/models/[table].py
+
+  - from: templates/java/entity.java.template
+    to: services/java/src/models/[table].java
+
+  - from: templates/typescript/types.ts.template
+    to: services/frontend/types/[table].ts
+```
+
+All three services share the same database schema—no manual synchronization needed.
+
+### API Documentation
+Generate OpenAPI/Swagger specs directly from database:
+
+```yaml
+output:
+  - from: templates/openapi/spec.yaml.template
+    to: generated/openapi.yaml
+    modus: schema
+```
+
+### Repository Pattern
+Python ORM with Repository pattern:
+
+```yaml
+output:
+  - from: templates/python/model.py.template
+    to: models/[table].py
+
+  - from: templates/python/repository.py.template
+    to: repositories/[table]_repository.py
+
+  - from: templates/python/sqlbuilder.py.template
+    to: builders/[table]_builder.py
+```
+
+### Custom Recordset Pattern
+If you prefer recordset/DAO pattern:
+
+```yaml
+output:
+  - from: templates/php/recordset.php.template
+    to: generated/[table]Recordset.php
+```
+
+### Database-First Documentation
+Keep schema documentation always in sync:
+
+```yaml
+output:
+  - from: templates/markdown/schema_docs.md.template
+    to: docs/schema.md
+    modus: schema
+```
+
 ### Development
-Perfect for rapid ORM generation during development:
+Perfect for rapid code generation during development:
 ```bash
-# Create test database, generate ORM code
+# Generate all outputs from single config
 python3 pystoorm.py dev_project.yml
 ```
 
@@ -253,22 +424,12 @@ SQLite connector makes testing easy:
 ```yaml
 connections:
   - connection: test
-    database: ':memory:'              # In-memory, no setup needed
+    database: ':memory:'
     connector: database.sqliteconnector.SqliteConnector
 ```
 
-### Multiple Projects
-All projects can share default configuration:
-```
-pystoorm/
-├── config/defaults/                 # Shared defaults
-├── projects/
-│   ├── project_a/project.yml       # Project-specific
-│   └── project_b/project.yml       # Project-specific
-```
-
 ### CI/CD Integration
-SQLite support means no external database needed:
+SQLite means no external database setup needed:
 ```bash
 # GitHub Actions, GitLab CI, etc.
 python3 -m pytest tests/test_integration_sqlite.py
