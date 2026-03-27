@@ -26,8 +26,20 @@ class ${camel_case(table_name)}:
 % endfor
     }
 
-    # Attributes
-% for column in table.columns.values():
+    # Attributes (required fields first, then optional fields for dataclass compatibility)
+<%
+    # Sort columns: required first, then nullable (for dataclass field ordering)
+    required_cols = []
+    nullable_cols = []
+    for col in table.columns.values():
+        is_nullable = (not bool(col.nullable)) or (col.key == 'PRI')
+        if is_nullable:
+            required_cols.append(col)
+        else:
+            nullable_cols.append(col)
+    sorted_columns = required_cols + nullable_cols
+%>
+% for column in sorted_columns:
     <%
         # Determine Python type
         col_type = column.type

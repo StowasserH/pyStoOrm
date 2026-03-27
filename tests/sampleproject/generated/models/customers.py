@@ -35,7 +35,8 @@ class Customers:
         'creditLimit': 'creditlimit',
     }
 
-    # Attributes
+    # Attributes (required fields first, then optional fields for dataclass compatibility)
+
     
     customernumber: int  # Primary Key: customerNumber
     
@@ -49,15 +50,15 @@ class Customers:
     
     addressline1: str  # Column: addressLine1 (str)
     
-    addressline2: Optional[str] = None  # Column: addressLine2 (str)
-    
     city: str  # Column: city (str)
+    
+    country: str  # Column: country (str)
+    
+    addressline2: Optional[str] = None  # Column: addressLine2 (str)
     
     state: Optional[str] = None  # Column: state (str)
     
     postalcode: Optional[str] = None  # Column: postalCode (str)
-    
-    country: str  # Column: country (str)
     
     salesrepemployeenumber: Optional[int] = None  # Foreign Key: salesRepEmployeeNumber
     

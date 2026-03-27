@@ -27,7 +27,8 @@ class Orderdetails:
         'orderLineNumber': 'orderlinenumber',
     }
 
-    # Attributes
+    # Attributes (required fields first, then optional fields for dataclass compatibility)
+
     
     ordernumber: int  # Primary Key: orderNumber
     

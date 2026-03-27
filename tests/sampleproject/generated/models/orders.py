@@ -29,7 +29,8 @@ class Orders:
         'customerNumber': 'customernumber',
     }
 
-    # Attributes
+    # Attributes (required fields first, then optional fields for dataclass compatibility)
+
     
     ordernumber: int  # Primary Key: orderNumber
     
@@ -37,13 +38,13 @@ class Orders:
     
     requireddate: str  # Column: requiredDate (str)
     
-    shippeddate: Optional[str] = None  # Column: shippedDate (str)
-    
     status: str  # Column: status (str)
     
-    comments: Optional[str] = None  # Column: comments (str)
-    
     customernumber: int  # Foreign Key: customerNumber
+    
+    shippeddate: Optional[str] = None  # Column: shippedDate (str)
+    
+    comments: Optional[str] = None  # Column: comments (str)
 
     # Internal storage for efficient database row conversion
     _internal_data: Optional[Tuple] = field(default=None, init=False, repr=False)

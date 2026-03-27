@@ -26,7 +26,8 @@ class Payments:
         'amount': 'amount',
     }
 
-    # Attributes
+    # Attributes (required fields first, then optional fields for dataclass compatibility)
+
     
     customernumber: int  # Primary Key: customerNumber
     

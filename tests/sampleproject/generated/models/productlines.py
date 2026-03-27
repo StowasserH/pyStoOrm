@@ -26,7 +26,8 @@ class Productlines:
         'image': 'image',
     }
 
-    # Attributes
+    # Attributes (required fields first, then optional fields for dataclass compatibility)
+
     
     productline: str  # Primary Key: productLine
     

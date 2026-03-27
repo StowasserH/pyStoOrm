@@ -30,7 +30,8 @@ class Employees:
         'jobTitle': 'jobtitle',
     }
 
-    # Attributes
+    # Attributes (required fields first, then optional fields for dataclass compatibility)
+
     
     employeenumber: int  # Primary Key: employeeNumber
     
@@ -44,9 +45,9 @@ class Employees:
     
     officecode: str  # Foreign Key: officeCode
     
-    reportsto: Optional[int] = None  # Foreign Key: reportsTo
-    
     jobtitle: str  # Column: jobTitle (str)
+    
+    reportsto: Optional[int] = None  # Foreign Key: reportsTo
 
     # Internal storage for efficient database row conversion
     _internal_data: Optional[Tuple] = field(default=None, init=False, repr=False)

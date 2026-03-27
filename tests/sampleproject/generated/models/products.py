@@ -31,7 +31,8 @@ class Products:
         'MSRP': 'msrp',
     }
 
-    # Attributes
+    # Attributes (required fields first, then optional fields for dataclass compatibility)
+
     
     productcode: str  # Primary Key: productCode
     

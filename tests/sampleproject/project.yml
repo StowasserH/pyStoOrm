@@ -20,6 +20,11 @@ output:
     enabled: true
     modus: table
 
+  - from: ../templates/python/sqlbuilder.py.template
+    to: ${output_dir}/builders/[table]_builder.py
+    enabled: true
+    modus: table
+
   - from: ../templates/erd/graphviz.template
     to: ${output_dir}/erd/[connection]_schema.dot
     enabled: true

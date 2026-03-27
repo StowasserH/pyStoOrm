@@ -31,7 +31,8 @@ class Offices:
         'territory': 'territory',
     }
 
-    # Attributes
+    # Attributes (required fields first, then optional fields for dataclass compatibility)
+
     
     officecode: str  # Primary Key: officeCode
     
@@ -41,15 +42,15 @@ class Offices:
     
     addressline1: str  # Column: addressLine1 (str)
     
-    addressline2: Optional[str] = None  # Column: addressLine2 (str)
-    
-    state: Optional[str] = None  # Column: state (str)
-    
     country: str  # Column: country (str)
     
     postalcode: str  # Column: postalCode (str)
     
     territory: str  # Column: territory (str)
+    
+    addressline2: Optional[str] = None  # Column: addressLine2 (str)
+    
+    state: Optional[str] = None  # Column: state (str)
 
     # Internal storage for efficient database row conversion
     _internal_data: Optional[Tuple] = field(default=None, init=False, repr=False)
