@@ -107,9 +107,8 @@ class ProductsRepository:
 
     def _row_to_model(self, row: sqlite3.Row) -> Products:
         """Convert a database row to a model object."""
-        columns_list = list(row.keys())
         row_tuple = tuple(row)
-        return Products._from_row(row_tuple, columns_list)
+        return Products._from_row(row_tuple)
 
     def find_by_id(self, id_value: Any) -> Optional[Products]:
         """

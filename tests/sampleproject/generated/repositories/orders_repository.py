@@ -103,9 +103,8 @@ class OrdersRepository:
 
     def _row_to_model(self, row: sqlite3.Row) -> Orders:
         """Convert a database row to a model object."""
-        columns_list = list(row.keys())
         row_tuple = tuple(row)
-        return Orders._from_row(row_tuple, columns_list)
+        return Orders._from_row(row_tuple)
 
     def find_by_id(self, id_value: Any) -> Optional[Orders]:
         """
