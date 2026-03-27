@@ -17,8 +17,18 @@ _models_dir = os.path.join(os.path.dirname(__file__), '..', 'models')
 sys.path.insert(0, _models_dir)
 from orders import Orders
 
+# Import BaseRepository from first table's repository
+_repos_dir = os.path.join(os.path.dirname(__file__))
+sys.path.insert(0, _repos_dir)
+from customers_repository import BaseRepository
 
-class OrdersRepository:
+
+
+# ============================================================
+# TABLE-SPECIFIC REPOSITORY CLASS
+# ============================================================
+
+class OrdersRepository(BaseRepository):
     """
     Repository for orders table.
 
@@ -87,19 +97,6 @@ class OrdersRepository:
     # ============================================================
     # Repository Methods
     # ============================================================
-
-    def __init__(self, db_path: str):
-        """Initialize repository with database path."""
-        self.db_path = db_path
-        self.connection = None
-        self._connect()
-
-    def _connect(self) -> None:
-        """Connect to database."""
-        if not os.path.exists(self.db_path):
-            raise FileNotFoundError(f"Database not found: {self.db_path}")
-        self.connection = sqlite3.connect(self.db_path)
-        self.connection.row_factory = sqlite3.Row
 
     def _row_to_model(self, row: sqlite3.Row) -> Orders:
         """Convert a database row to a model object."""
@@ -296,12 +293,3 @@ class OrdersRepository:
         deleted_count = cursor.rowcount
         cursor.close()
         return deleted_count
-
-    def close(self) -> None:
-        """Close the database connection."""
-        if self.connection:
-            self.connection.close()
-
-    def __del__(self):
-        """Cleanup on deletion."""
-        self.close()

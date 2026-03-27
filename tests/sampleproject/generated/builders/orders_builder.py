@@ -19,10 +19,20 @@ sys.path.insert(0, _repos_dir)
 from orders import Orders
 from orders_repository import OrdersRepository
 
+# Import BaseBuilder from first table's builder
+_builders_dir = os.path.join(os.path.dirname(__file__))
+sys.path.insert(0, _builders_dir)
+from customers_builder import BaseBuilder
 
 
 
-class OrdersBuilder:
+
+
+# ============================================================
+# TABLE-SPECIFIC BUILDER CLASS
+# ============================================================
+
+class OrdersBuilder(BaseBuilder):
     """
     SQL Query Builder for orders table.
 

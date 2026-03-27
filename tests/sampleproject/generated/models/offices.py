@@ -11,8 +11,16 @@ import uuid
 from typing import Optional, Tuple, Any
 from datetime import datetime
 
+# Import BaseModel from first table's model
+from customers import BaseModel
 
-class Offices:
+
+
+# ============================================================
+# TABLE-SPECIFIC MODEL CLASS
+# ============================================================
+
+class Offices(BaseModel):
     """
     Model for offices table.
 
@@ -74,60 +82,6 @@ class Offices:
     # Primary key and attitude column names
     _PRIMARY_KEY = 'officeCode' if 'officeCode' else None
     _ATTITUDE_COLUMN = 'officeCode' if 'officeCode' else None
-
-    def __init__(self):
-        """Initialize a new offices model."""
-        # Hidden ID for models not yet persisted to database
-        self._hidden_id = str(uuid.uuid4())
-
-        # Storage for actual data (tuple from database or None for new records)
-        self._internal_data: Optional[Tuple] = None
-
-        # Track modifications (column_name -> new_value)
-        self._dirty = False
-        self._modified_values = {}
-
-    @classmethod
-    def _from_row(cls, row: Tuple) -> 'Offices':
-        """
-        Create model directly from database row (zero-copy).
-
-        The row tuple is stored directly without copying to class attributes.
-
-        Args:
-            row: Tuple of column values from database
-
-        Returns:
-            New model instance
-        """
-        instance = cls()
-        instance._internal_data = row
-        instance._dirty = False
-        instance._modified_values = {}
-        return instance
-
-    def _get_value(self, column_name: str) -> Any:
-        """
-        Get a value from either modified values or the row tuple.
-
-        Checks modified_values first (in-memory changes), then the database row.
-        """
-        # Check if we have a modified value
-        if column_name in self._modified_values:
-            return self._modified_values[column_name]
-
-        # Otherwise get from the row tuple
-        if self._internal_data is not None:
-            idx = self._COLUMN_INDEX.get(column_name)
-            if idx is not None and idx < len(self._internal_data):
-                return self._internal_data[idx]
-
-        return None
-
-    def _set_value(self, column_name: str, value: Any) -> None:
-        """Set a value and mark as dirty."""
-        self._modified_values[column_name] = value
-        self._dirty = True
 
 
 
@@ -237,79 +191,3 @@ class Offices:
         """Set territory."""
         self._set_value('territory', value)
 
-
-    @property
-    def is_dirty(self) -> bool:
-        """Check if this model has been modified."""
-        return self._dirty
-
-    @property
-    def modified_columns(self) -> dict:
-        """Get all modified columns as dict."""
-        return self._modified_values.copy()
-
-    def reset_dirty(self) -> None:
-        """Clear the dirty flag (use after persisting)."""
-        self._dirty = False
-        self._modified_values = {}
-
-    def get_id(self) -> Any:
-        """
-        Get the model's identifier.
-
-        Returns the primary key value if persisted, otherwise the hidden ID.
-        """
-        if self._internal_data is not None:
-            return self._get_value('officeCode')
-        return self._hidden_id
-
-    def to_dict(self) -> dict:
-        """Convert model to dictionary."""
-        result = {}
-
-        # Get all values (from modified_values first, then from row)
-        for col_name in self._COLUMNS:
-            result[col_name] = self._get_value(col_name)
-
-        return result
-
-    def __str__(self) -> str:
-        """
-        User-friendly string representation.
-
-        Shows the attitude column value (column named like the table, or 'name', etc.)
-        """
-        if self._ATTITUDE_COLUMN:
-            value = self._get_value(self._ATTITUDE_COLUMN)
-            if value is not None:
-                return f"{value}"
-
-        # Fallback: show first non-ID column
-        for col_name in self._COLUMNS:
-            if col_name != self._PRIMARY_KEY:
-                value = self._get_value(col_name)
-                if value is not None:
-                    return str(value)
-
-        return f"Offices(id={self.get_id()})"
-
-    def __repr__(self) -> str:
-        """
-        Technical representation.
-
-        Shows attitude column value + primary key + dirty status.
-        """
-        attitude_value = str(self)
-        model_id = self.get_id()
-        dirty = " (modified)" if self._dirty else ""
-        return f"Offices({attitude_value} [id={model_id}]){dirty}"
-
-    def __eq__(self, other) -> bool:
-        """Compare models by ID."""
-        if not isinstance(other, Offices):
-            return False
-        return self.get_id() == other.get_id()
-
-    def __hash__(self) -> int:
-        """Hash by ID for use in sets/dicts."""
-        return hash(self.get_id())

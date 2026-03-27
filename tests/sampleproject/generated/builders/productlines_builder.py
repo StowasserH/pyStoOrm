@@ -19,10 +19,20 @@ sys.path.insert(0, _repos_dir)
 from productlines import Productlines
 from productlines_repository import ProductlinesRepository
 
+# Import BaseBuilder from first table's builder
+_builders_dir = os.path.join(os.path.dirname(__file__))
+sys.path.insert(0, _builders_dir)
+from customers_builder import BaseBuilder
 
 
 
-class ProductlinesBuilder:
+
+
+# ============================================================
+# TABLE-SPECIFIC BUILDER CLASS
+# ============================================================
+
+class ProductlinesBuilder(BaseBuilder):
     """
     SQL Query Builder for productlines table.
 

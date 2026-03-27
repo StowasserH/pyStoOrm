@@ -20,9 +20,61 @@ from customers import Customers
 from customers_repository import CustomersRepository
 
 
+# ============================================================
+# BASE BUILDER CLASS (generated once for all builders)
+# ============================================================
+
+class BaseBuilder:
+    """
+    Base class for all generated SQL query builders.
+
+    Provides common SQL fragment generation and row-to-model conversion.
+    """
+
+    @staticmethod
+    def select(alias: str = None) -> str:
+        """Generate SELECT clause. Override in subclass."""
+        raise NotImplementedError("Subclass must implement select()")
+
+    @staticmethod
+    def where_pk(alias: str = None) -> str:
+        """Generate WHERE clause for primary key. Override in subclass."""
+        raise NotImplementedError("Subclass must implement where_pk()")
+
+    @staticmethod
+    def table() -> str:
+        """Get table name. Override in subclass."""
+        raise NotImplementedError("Subclass must implement table()")
+
+    @staticmethod
+    def alias() -> str:
+        """Get default table alias. Override in subclass."""
+        raise NotImplementedError("Subclass must implement alias()")
+
+    @staticmethod
+    def pk() -> str:
+        """Get primary key column name. Override in subclass."""
+        raise NotImplementedError("Subclass must implement pk()")
+
+    @staticmethod
+    def columns() -> List[str]:
+        """Get list of column names. Override in subclass."""
+        raise NotImplementedError("Subclass must implement columns()")
+
+    @staticmethod
+    def column_count() -> int:
+        """Get number of columns in table. Override in subclass."""
+        raise NotImplementedError("Subclass must implement column_count()")
 
 
-class CustomersBuilder:
+
+
+
+# ============================================================
+# TABLE-SPECIFIC BUILDER CLASS
+# ============================================================
+
+class CustomersBuilder(BaseBuilder):
     """
     SQL Query Builder for customers table.
 

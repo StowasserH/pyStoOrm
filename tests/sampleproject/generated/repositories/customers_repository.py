@@ -18,7 +18,80 @@ sys.path.insert(0, _models_dir)
 from customers import Customers
 
 
-class CustomersRepository:
+# ============================================================
+# BASE REPOSITORY CLASS (generated once for all repositories)
+# ============================================================
+
+class BaseRepository:
+    """
+    Base class for all generated repositories.
+
+    Provides common functionality:
+    - Database connection management
+    - Row-to-model conversion
+    - Common query methods
+    """
+
+    SQL_TABLE = ''
+    SQL_ALIAS = ''
+    SQL_PK = ''
+    SQL_COLS = []
+    SQL_IDX = {}
+    SQL_TYPES = ''
+
+    def __init__(self, db_path: str):
+        """Initialize repository with database path."""
+        self.db_path = db_path
+        self.connection = None
+        self._connect()
+
+    def _connect(self) -> None:
+        """Connect to database."""
+        if not os.path.exists(self.db_path):
+            raise FileNotFoundError(f"Database not found: {self.db_path}")
+        self.connection = sqlite3.connect(self.db_path)
+        self.connection.row_factory = sqlite3.Row
+
+    def _row_to_model(self, row: sqlite3.Row):
+        """Convert a database row to a model object. Override in subclass."""
+        raise NotImplementedError("Subclass must implement _row_to_model()")
+
+    @staticmethod
+    def sql_select(alias: str = None) -> str:
+        """Build SELECT clause with table alias. Override in subclass."""
+        raise NotImplementedError("Subclass must implement sql_select()")
+
+    @staticmethod
+    def sql_insert_cols() -> str:
+        """Build column list for INSERT. Override in subclass."""
+        raise NotImplementedError("Subclass must implement sql_insert_cols()")
+
+    @staticmethod
+    def sql_insert_placeholders() -> str:
+        """Build placeholder string for INSERT. Override in subclass."""
+        raise NotImplementedError("Subclass must implement sql_insert_placeholders()")
+
+    @staticmethod
+    def sql_update_set() -> str:
+        """Build SET clause for UPDATE. Override in subclass."""
+        raise NotImplementedError("Subclass must implement sql_update_set()")
+
+    def close(self) -> None:
+        """Close the database connection."""
+        if self.connection:
+            self.connection.close()
+
+    def __del__(self):
+        """Cleanup on deletion."""
+        self.close()
+
+
+
+# ============================================================
+# TABLE-SPECIFIC REPOSITORY CLASS
+# ============================================================
+
+class CustomersRepository(BaseRepository):
     """
     Repository for customers table.
 
@@ -99,19 +172,6 @@ class CustomersRepository:
     # ============================================================
     # Repository Methods
     # ============================================================
-
-    def __init__(self, db_path: str):
-        """Initialize repository with database path."""
-        self.db_path = db_path
-        self.connection = None
-        self._connect()
-
-    def _connect(self) -> None:
-        """Connect to database."""
-        if not os.path.exists(self.db_path):
-            raise FileNotFoundError(f"Database not found: {self.db_path}")
-        self.connection = sqlite3.connect(self.db_path)
-        self.connection.row_factory = sqlite3.Row
 
     def _row_to_model(self, row: sqlite3.Row) -> Customers:
         """Convert a database row to a model object."""
@@ -314,12 +374,3 @@ class CustomersRepository:
         deleted_count = cursor.rowcount
         cursor.close()
         return deleted_count
-
-    def close(self) -> None:
-        """Close the database connection."""
-        if self.connection:
-            self.connection.close()
-
-    def __del__(self):
-        """Cleanup on deletion."""
-        self.close()

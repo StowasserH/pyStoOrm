@@ -19,10 +19,20 @@ sys.path.insert(0, _repos_dir)
 from employees import Employees
 from employees_repository import EmployeesRepository
 
+# Import BaseBuilder from first table's builder
+_builders_dir = os.path.join(os.path.dirname(__file__))
+sys.path.insert(0, _builders_dir)
+from customers_builder import BaseBuilder
 
 
 
-class EmployeesBuilder:
+
+
+# ============================================================
+# TABLE-SPECIFIC BUILDER CLASS
+# ============================================================
+
+class EmployeesBuilder(BaseBuilder):
     """
     SQL Query Builder for employees table.
 

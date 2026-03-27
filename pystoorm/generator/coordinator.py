@@ -227,7 +227,9 @@ class Coordinator(object):
                 logger.warning(f"No parsed schema for connection {connection.get('connection')}")
                 continue
 
-            for table_name in schema.table_names:
+            first_table_name = schema.table_names[0] if schema.table_names else None
+
+            for table_idx, table_name in enumerate(schema.table_names):
                 table = schema.tables[table_name]
 
                 # Create context
@@ -238,7 +240,11 @@ class Coordinator(object):
                     table_name=table_name,
                     schema=schema,
                     underscored=underscored,
-                    camel_case=camel_case
+                    camel_case=camel_case,
+                    _first_table=(table_idx == 0),
+                    _last_table=(table_idx == len(schema.table_names) - 1),
+                    _table_index=table_idx,
+                    _first_table_name=first_table_name
                 )
 
                 # Render template
