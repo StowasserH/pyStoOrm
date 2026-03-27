@@ -1,201 +1,208 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Example usage of pyStoOrm generated models and repositories.
+Example: pyStoOrm Repository Pattern
 
-This script demonstrates the Repository Pattern for CRUD operations
-using the auto-generated classes from the classic models sample database.
+This demonstrates the Repository Pattern with proper encapsulation:
+- Models are accessed only via properties (getters/setters)
+- Repositories return individual model objects (not arrays)
+- Models track whether they have been modified (dirty flag)
+- Models have a unique identifier even before persisting
 """
 import os
 import sys
 from pathlib import Path
 
-# Add the project root and generated modules to the path
+# Setup paths
 CURRENT_DIR = Path(__file__).parent
 GENERATED_DIR = CURRENT_DIR / "generated"
-PROJECT_ROOT = CURRENT_DIR.parent.parent  # pyStoOrm root
-sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(GENERATED_DIR))
-
-def print_section(title):
-    """Print a section header."""
-    print(f"\n{'='*60}")
-    print(f"  {title}")
-    print(f"{'='*60}\n")
 
 
 def main():
-    """Demonstrate repository usage with generated classes."""
-
     db_path = str(CURRENT_DIR / "classicmodels.db")
 
+    # Check database exists
     if not os.path.exists(db_path):
-        print("Error: Database file not found!")
-        print(f"Run batch.sh first to generate the database and models:")
-        print(f"  cd {CURRENT_DIR}")
-        print(f"  bash batch.sh")
+        print("Error: Database not found!")
+        print("Run batch.sh first:")
+        print(f"  cd {CURRENT_DIR} && bash batch.sh")
         sys.exit(1)
 
-    print("\n" + "="*60)
-    print("  pyStoOrm Repository Pattern - Example Usage")
-    print("="*60)
-
-    # Dynamic import of repositories
-    try:
-        from repositories.payments_repository import PaymentsRepository
-        print("\n✓ Successfully imported PaymentsRepository")
-        RepoClass = PaymentsRepository
-        TableName = "Payments"
-    except ImportError as e:
-        print(f"\n✗ Error importing PaymentsRepository: {e}")
-        print("\nMake sure to run batch.sh first to generate the repositories:")
-        print(f"  cd {CURRENT_DIR}")
-        print(f"  bash batch.sh")
-        sys.exit(1)
+    print("\n" + "="*70)
+    print("  pyStoOrm - Repository Pattern Example")
+    print("="*70)
 
     # ==========================================
-    # Initialize repository
+    # [1] Customers Repository - find_by_id()
     # ==========================================
-    print_section("1. Initialize Repository")
+    print("\n[1] Find a Customer by ID")
+    print("-" * 70)
 
-    repo = RepoClass(db_path)
-    print(f"✓ Repository initialized with database: {db_path}")
-    print(f"  Primary key: {repo.primary_key}")
-    print(f"  Table: {repo.table_name}")
+    from repositories.customers_repository import CustomersRepository
 
-    # ==========================================
-    # Count all records
-    # ==========================================
-    print_section("2. Count Records")
+    customers_repo = CustomersRepository(db_path)
+    customer = customers_repo.find_by_id(103)
 
-    total_count = repo.count()
-    print(f"✓ Total customers in database: {total_count}")
-
-    # ==========================================
-    # Find all records
-    # ==========================================
-    print_section("3. Find All Records")
-
-    records = repo.find_all()
-    print(f"✓ Retrieved {len(records)} {TableName.lower()} records")
-
-    if records:
-        print(f"\nFirst 3 {TableName.lower()} records:")
-        for i, record in enumerate(records[:3], 1):
-            print(f"\n  {i}. {record}")
-
-    # ==========================================
-    # Find by primary key
-    # ==========================================
-    print_section("4. Find by Primary Key")
-
-    # Get first record's ID to demonstrate find_by_id
-    if records:
-        first_record = records[0]
-        first_id = getattr(first_record, repo.primary_key)
-        record = repo.find_by_id(first_id)
-
-        if record:
-            print(f"✓ Found {TableName.lower()} record with ID {first_id}:")
-            print(f"\n  {record}")
-            print(f"\n  Attributes:")
-            data = record.to_dict()
-            for key, value in list(data.items())[:5]:
-                print(f"    - {key}: {value}")
-        else:
-            print(f"✗ No record found with ID {first_id}")
+    if customer:
+        print(f"Customer found: {customer}")
+        print(f"  ID: {customer.get_id()}")
+        print(f"  Name: {customer.contactfirstname} {customer.contactlastname}")
+        print(f"  City: {customer.city}")
+        print(f"  Country: {customer.country}")
+        print(f"  Is modified: {customer.is_dirty}")
     else:
-        print("✗ No records in database to demonstrate find_by_id")
-
-    # ==========================================
-    # Find with criteria
-    # ==========================================
-    print_section("5. Find with Criteria")
-
-    # For this example, we'll demonstrate the capability even if no criteria matches
-    # In a real scenario, you would know which columns exist in your table
-    print(f"✓ Repository supports finding records with criteria")
-    print(f"  Example: repo.find_all_by(column_name=value)")
-    print(f"\nAvailable methods for searching:")
-    print(f"  - find_all_by(**criteria) - Find records matching criteria")
-    print(f"  - count(**criteria) - Count records matching criteria")
+        print("Customer not found")
 
 
     # ==========================================
-    # Check existence
+    # [2] Modify a Model - Dirty Flag
     # ==========================================
-    print_section("7. Check Record Existence")
+    print("\n[2] Modify a Model (Dirty Flag)")
+    print("-" * 70)
 
-    # Check first record
-    if records:
-        first_id = getattr(records[0], repo.primary_key)
-        exists = repo.exists(first_id)
-        status = "✓ Exists" if exists else "✗ Not found"
-        print(f"  Record {first_id}: {status}")
-    else:
-        print("  No records to check")
+    if customer:
+        print(f"Before: {customer}")
+        print(f"Modified: {customer.is_dirty}")
 
-    # ==========================================
-    # Create and save new record
-    # ==========================================
-    print_section("8. Create and Save New Record")
+        # Modify via property setter
+        customer.city = "São Paulo"
+        customer.country = "Brazil"
 
-    try:
-        from models.payments import Payments
+        print(f"After:  {customer}")
+        print(f"Modified: {customer.is_dirty}")
+        print(f"Changed columns: {customer.modified_columns}")
 
-        # Create a new payment record
-        new_payment = Payments(
-            customernumber=101,
-            checknumber="CHK-TEST-999",
-            paymentdate="2024-03-27",
-            amount=5000.00
-        )
-
-        print(f"✓ Created new {TableName.lower()} object:")
-        print(f"  {new_payment}")
-
-        # Save to database
-        saved = repo.save(new_payment)
-        print(f"\n✓ Saved to database")
-        print(f"  Check: {saved.checknumber}")
-
-        # Verify it was saved
-        retrieved = repo.find_by_id(saved.checknumber)
-        if retrieved:
-            print(f"\n✓ Verified saved record exists in database:")
-            print(f"  {retrieved}")
-
-    except Exception as e:
-        print(f"⚠ Note: Could not test save operation: {e}")
-        print("  (This is normal if the database is read-only or has constraints)")
 
     # ==========================================
-    # Summary
+    # [3] Customers Repository - find_all() as Generator
     # ==========================================
-    print_section("Summary")
+    print("\n[3] Find All Customers (Generator)")
+    print("-" * 70)
 
-    print("Repository Pattern Capabilities Demonstrated:")
-    print("  ✓ find_all() - Retrieve all records")
-    print("  ✓ find_by_id() - Retrieve specific record by primary key")
-    print("  ✓ find_all_by() - Find records matching criteria")
-    print("  ✓ count() - Count records (with optional criteria)")
-    print("  ✓ exists() - Check if record exists")
-    print("  ✓ save() - Insert or update records")
-    print("  ✓ delete() - Delete record by ID")
-    print("  ✓ delete_all() - Delete records matching criteria")
+    total = customers_repo.count()
+    print(f"Total customers: {total}")
+    print(f"\nFirst 3 customers (lazy loaded):")
 
-    print("\nRepository Features:")
-    print("  • Data abstraction layer")
-    print("  • Type-safe queries")
-    print("  • Automatic model conversion")
-    print("  • Transaction support")
+    for i, cust in enumerate(customers_repo.find_all()):
+        if i >= 3:
+            break
+        print(f"  {i+1}. {cust}")
+        print(f"     Country: {cust.country}")
+
+
+    # ==========================================
+    # [4] Find with Criteria
+    # ==========================================
+    print("\n[4] Find Customers by Criteria")
+    print("-" * 70)
+
+    us_count = 0
+    print("Customers from USA:")
+    for cust in customers_repo.find(country='USA'):
+        print(f"  • {cust}")
+        us_count += 1
+        if us_count >= 3:
+            break
+
+    print(f"\nTotal USA customers: {customers_repo.count(country='USA')}")
+
+
+    # ==========================================
+    # [5] Orders Repository - Individual Objects
+    # ==========================================
+    print("\n[5] Orders Repository")
+    print("-" * 70)
+
+    from repositories.orders_repository import OrdersRepository
+
+    orders_repo = OrdersRepository(db_path)
+
+    # Find specific order
+    order = orders_repo.find_by_id(10100)
+    if order:
+        print(f"Order found: {order}")
+        print(f"  ID: {order.get_id()}")
+        print(f"  Customer: {order.customernumber}")
+        print(f"  Order Date: {order.orderdate}")
+        print(f"  Required Date: {order.requireddate}")
+        print(f"  Is modified: {order.is_dirty}")
+
+
+    # ==========================================
+    # [6] Model without Database ID - Hidden ID
+    # ==========================================
+    print("\n[6] New Model - Hidden ID (not yet persisted)")
+    print("-" * 70)
+
+    from models.orders import Orders
+
+    # Create new order (not in database yet)
+    new_order = Orders()
+    new_order.customernumber = 999
+    new_order.orderdate = "2024-03-27"
+    new_order.requireddate = "2024-04-10"
+    new_order.shippeddate = None
+    new_order.status = "In Process"
+    new_order.comments = "Test order"
+
+    print(f"New order: {new_order}")
+    print(f"  ID (hidden): {new_order.get_id()}")
+    print(f"  Modified: {new_order.is_dirty}")
+    print(f"  Modified columns: {new_order.modified_columns}")
+
+    # Convert to dict
+    order_dict = new_order.to_dict()
+    print(f"\nAs dictionary:")
+    for key, value in order_dict.items():
+        print(f"  {key}: {value}")
+
+
+    # ==========================================
+    # [7] Products Repository
+    # ==========================================
+    print("\n[7] Products Repository")
+    print("-" * 70)
+
+    from repositories.products_repository import ProductsRepository
+
+    products_repo = ProductsRepository(db_path)
+
+    print(f"Total products: {products_repo.count()}")
+    print("\nFirst 5 products:")
+
+    for i, product in enumerate(products_repo.find_all()):
+        if i >= 5:
+            break
+        print(f"  {product}")
+
+
+    # ==========================================
+    # Summary - Repository Pattern
+    # ==========================================
+    print("\n[8] Repository Pattern Features")
+    print("-" * 70)
+
+    print("✓ Models are accessed only via properties (getters/setters)")
+    print("✓ Repositories return individual objects (not arrays)")
+    print("✓ find_all() returns a generator (lazy loading)")
+    print("✓ Models track changes with _dirty flag")
+    print("✓ Models have get_id() - database ID or hidden UUID")
+    print("✓ New models get a hidden ID until persisted")
+    print("✓ Modified columns tracked via modified_columns dict")
+    print("✓ to_dict() converts model to dictionary")
+    print("✓ __str__() shows 'attitude' (key descriptor)")
+    print("✓ __repr__() shows attitude + ID + modification status")
+
 
     # Cleanup
-    repo.close()
+    customers_repo.close()
+    orders_repo.close()
+    products_repo.close()
 
-    print("\n" + "="*60)
-    print("✓ Example completed successfully!")
-    print("="*60 + "\n")
+    print("\n" + "="*70)
+    print("✓ Example completed")
+    print("="*70 + "\n")
 
 
 if __name__ == "__main__":
