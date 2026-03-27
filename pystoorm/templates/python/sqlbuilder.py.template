@@ -240,9 +240,8 @@ class ${camel_case(table_name)}Builder(${_base_builder_class_name}):
             end_idx = start_idx + ${camel_case(table_name)}Builder.column_count()
 
         row_slice = row[start_idx:end_idx]
-        column_order = ${camel_case(table_name)}Repository.SQL_COLS
 
-        return ${camel_case(table_name)}._from_row(row_slice, column_order)
+        return ${camel_case(table_name)}._from_row(row_slice)
 
     @staticmethod
     def from_rows(rows: List[Tuple[Any, ...]], start_idx: int = 0, end_idx: int = None) -> List[${camel_case(table_name)}]:

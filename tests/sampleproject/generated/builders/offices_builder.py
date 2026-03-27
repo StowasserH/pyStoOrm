@@ -176,9 +176,8 @@ class OfficesBuilder(BaseBuilder):
             end_idx = start_idx + OfficesBuilder.column_count()
 
         row_slice = row[start_idx:end_idx]
-        column_order = OfficesRepository.SQL_COLS
 
-        return Offices._from_row(row_slice, column_order)
+        return Offices._from_row(row_slice)
 
     @staticmethod
     def from_rows(rows: List[Tuple[Any, ...]], start_idx: int = 0, end_idx: int = None) -> List[Offices]:

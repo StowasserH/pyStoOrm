@@ -159,9 +159,52 @@ def main():
 
 
     # ==========================================
-    # [7] Products Repository
+    # [7] Custom JOIN Query with SQL Metadata
     # ==========================================
-    print("\n[7] Products Repository")
+    print("\n[7] Custom JOIN Query")
+    print("-" * 70)
+
+    from builders.customers_builder import CustomersBuilder
+    from builders.orders_builder import OrdersBuilder
+
+    # Get customers and their orders using custom SQL
+    query = f"""
+    SELECT {CustomersBuilder.select('c')}, {OrdersBuilder.select('o')}
+    FROM {CustomersRepository.SQL_TABLE} c
+    LEFT JOIN {OrdersRepository.SQL_TABLE} o ON o.customerNumber = c.customerNumber
+    WHERE c.country = ?
+    ORDER BY c.customerNumber, o.orderNumber
+    LIMIT 6
+    """
+
+    cursor = customers_repo.connection.cursor()
+    cursor.execute(query, ('USA',))
+
+    print("Customers from USA with their Orders (using custom JOIN):\n")
+
+    customer_col_count = len(CustomersBuilder.columns())
+    order_col_count = len(OrdersBuilder.columns())
+
+    for i, row in enumerate(cursor):
+        # Split row into customer and order parts
+        customer_row = row[:customer_col_count]
+        order_row = row[customer_col_count:]
+
+        customer = CustomersBuilder.from_row(customer_row)
+        order = OrdersBuilder.from_row(order_row) if order_row[0] is not None else None
+
+        if order:
+            print(f"  • {customer} → Order #{order.ordernumber} ({order.orderdate})")
+        else:
+            print(f"  • {customer} → (no orders)")
+
+    cursor.close()
+
+
+    # ==========================================
+    # [8] Products Repository
+    # ==========================================
+    print("\n[8] Products Repository")
     print("-" * 70)
 
     from repositories.products_repository import ProductsRepository
@@ -178,9 +221,9 @@ def main():
 
 
     # ==========================================
-    # Summary - Repository Pattern
+    # [9] Repository Pattern Features
     # ==========================================
-    print("\n[8] Repository Pattern Features")
+    print("\n[9] Repository Pattern Features")
     print("-" * 70)
 
     print("✓ Models are accessed only via properties (getters/setters)")

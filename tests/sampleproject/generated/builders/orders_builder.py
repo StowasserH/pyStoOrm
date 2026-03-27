@@ -176,9 +176,8 @@ class OrdersBuilder(BaseBuilder):
             end_idx = start_idx + OrdersBuilder.column_count()
 
         row_slice = row[start_idx:end_idx]
-        column_order = OrdersRepository.SQL_COLS
 
-        return Orders._from_row(row_slice, column_order)
+        return Orders._from_row(row_slice)
 
     @staticmethod
     def from_rows(rows: List[Tuple[Any, ...]], start_idx: int = 0, end_idx: int = None) -> List[Orders]:

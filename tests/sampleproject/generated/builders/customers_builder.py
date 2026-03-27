@@ -218,9 +218,8 @@ class CustomersBuilder(BaseBuilder):
             end_idx = start_idx + CustomersBuilder.column_count()
 
         row_slice = row[start_idx:end_idx]
-        column_order = CustomersRepository.SQL_COLS
 
-        return Customers._from_row(row_slice, column_order)
+        return Customers._from_row(row_slice)
 
     @staticmethod
     def from_rows(rows: List[Tuple[Any, ...]], start_idx: int = 0, end_idx: int = None) -> List[Customers]:

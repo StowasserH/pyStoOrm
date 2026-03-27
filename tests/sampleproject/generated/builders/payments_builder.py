@@ -176,9 +176,8 @@ class PaymentsBuilder(BaseBuilder):
             end_idx = start_idx + PaymentsBuilder.column_count()
 
         row_slice = row[start_idx:end_idx]
-        column_order = PaymentsRepository.SQL_COLS
 
-        return Payments._from_row(row_slice, column_order)
+        return Payments._from_row(row_slice)
 
     @staticmethod
     def from_rows(rows: List[Tuple[Any, ...]], start_idx: int = 0, end_idx: int = None) -> List[Payments]:
