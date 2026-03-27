@@ -53,6 +53,55 @@ def print_success(message):
     print(f"✓ {message}")
 
 
+def _resolve_config_paths(config, config_dir):
+    """
+    Resolve ${variable} placeholders in config and make all paths absolute.
+
+    Resolves relative to config file directory.
+    """
+    # Define available variables - these must be resolved BEFORE making paths absolute
+    variables = {
+        'project_root': config_dir,
+    }
+
+    def resolve_path(path):
+        """Resolve a single path with variables and make it absolute."""
+        if not isinstance(path, str):
+            return path
+
+        # Replace ${var} with actual values
+        for var_name, var_value in variables.items():
+            path = path.replace(f'${{{var_name}}}', var_value)
+
+        # Make relative paths absolute (relative to config dir)
+        if path and not os.path.isabs(path):
+            path = os.path.normpath(os.path.join(config_dir, path))
+        elif path:
+            path = os.path.normpath(path)
+
+        return path
+
+    # Resolve output_dir first
+    if 'output_dir' in config:
+        config['output_dir'] = resolve_path(config['output_dir'])
+
+    # Resolve paths in output templates
+    if 'output' in config:
+        for template in config['output']:
+            if 'from' in template:
+                template['from'] = resolve_path(template['from'])
+            if 'to' in template:
+                template['to'] = resolve_path(template['to'])
+
+    # Resolve database paths
+    if 'connections' in config:
+        for conn in config['connections']:
+            if 'database' in conn:
+                conn['database'] = resolve_path(conn['database'])
+
+    return config
+
+
 def main():
     """Main entry point."""
     print_header()
@@ -96,6 +145,10 @@ def main():
         loader = ConfigLoader()
         loader.load_defaults().load_project(config_file)
         config = loader.get_config()
+
+        # Resolve path variables in config
+        config_dir = os.path.dirname(os.path.abspath(config_file))
+        config = _resolve_config_paths(config, config_dir)
 
         # Set logging level from config
         log_level = config.get('logging', {}).get('level', 'INFO')

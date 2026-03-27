@@ -3,29 +3,25 @@ connections:
     database: classicmodels.db
     connector: pystoorm.database.sqliteconnector.SqliteConnector
 
-# PROJECT PATHS
-project_root: .
-output_dir: ${project_root}/generated
+output_dir: generated
 
-# OUTPUT TEMPLATES
-# Template paths will be resolved relative to this YAML file's directory
 output:
-  - from: ../templates/python/model.py.template
-    to: ${output_dir}/models/[table].py
+  - from: ../../pystoorm/templates/python/model.py.template
+    to: generated/models/[table].py
     enabled: true
     modus: table
 
-  - from: ../templates/python/repository.py.template
-    to: ${output_dir}/repositories/[table]_repository.py
+  - from: ../../pystoorm/templates/python/repository.py.template
+    to: generated/repositories/[table]_repository.py
     enabled: true
     modus: table
 
-  - from: ../templates/python/sqlbuilder.py.template
-    to: ${output_dir}/builders/[table]_builder.py
+  - from: ../../pystoorm/templates/python/sqlbuilder.py.template
+    to: generated/builders/[table]_builder.py
     enabled: true
     modus: table
 
-  - from: ../templates/erd/graphviz.template
-    to: ${output_dir}/erd/[connection]_schema.dot
+  - from: ../../pystoorm/templates/erd/graphviz.template
+    to: generated/erd/[connection]_schema.dot
     enabled: true
     modus: schema
