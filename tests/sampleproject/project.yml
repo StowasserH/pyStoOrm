@@ -5,6 +5,19 @@ connections:
 
 output_dir: generated
 
+# Optional: Configure custom base classes
+# Uncomment to use custom base classes instead of the default ones
+# base_classes:
+#   model:
+#     class_name: MyBaseModel
+#     import_from: custom_bases.my_model
+#   repository:
+#     class_name: MyRepository
+#     import_from: custom_bases.my_repository
+#   builder:
+#     class_name: MyBuilder
+#     import_from: custom_bases.my_builder
+
 output:
   - from: ../../pystoorm/templates/python/model.py.template
     to: generated/models/[table].py

@@ -21,10 +21,15 @@ from ${underscored(table_name)} import ${camel_case(table_name)}
 from ${underscored(table_name)}_repository import ${camel_case(table_name)}Repository
 
 % if not _first_table:
+% if _base_builder_import_from:
+# Import custom base builder
+from ${_base_builder_import_from} import ${_base_builder_class_name}
+% else:
 # Import BaseBuilder from first table's builder
 _builders_dir = os.path.join(os.path.dirname(__file__))
 sys.path.insert(0, _builders_dir)
 from ${underscored(_first_table_name)}_builder import BaseBuilder
+% endif
 
 % endif
 % if _first_table:
@@ -91,7 +96,7 @@ class BaseBuilder:
 # TABLE-SPECIFIC BUILDER CLASS
 # ============================================================
 
-class ${camel_case(table_name)}Builder(BaseBuilder):
+class ${camel_case(table_name)}Builder(${_base_builder_class_name}):
     """
     SQL Query Builder for ${table_name} table.
 

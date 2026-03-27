@@ -19,10 +19,15 @@ sys.path.insert(0, _models_dir)
 from ${underscored(table_name)} import ${camel_case(table_name)}
 
 % if not _first_table:
+% if _base_repository_import_from:
+# Import custom base repository
+from ${_base_repository_import_from} import ${_base_repository_class_name}
+% else:
 # Import BaseRepository from first table's repository
 _repos_dir = os.path.join(os.path.dirname(__file__))
 sys.path.insert(0, _repos_dir)
 from ${underscored(_first_table_name)}_repository import BaseRepository
+% endif
 
 % endif
 % if _first_table:
@@ -101,7 +106,7 @@ class BaseRepository:
 # TABLE-SPECIFIC REPOSITORY CLASS
 # ============================================================
 
-class ${camel_case(table_name)}Repository(BaseRepository):
+class ${camel_case(table_name)}Repository(${_base_repository_class_name}):
     """
     Repository for ${table_name} table.
 

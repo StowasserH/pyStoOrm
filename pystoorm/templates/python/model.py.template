@@ -13,8 +13,13 @@ from typing import Optional, Tuple, Any
 from datetime import datetime
 
 % if not _first_table:
+% if _base_model_import_from:
+# Import custom base model
+from ${_base_model_import_from} import ${_base_model_class_name}
+% else:
 # Import BaseModel from first table's model
 from ${underscored(_first_table_name)} import BaseModel
+% endif
 
 % endif
 % if _first_table:
@@ -167,7 +172,7 @@ class BaseModel:
 # TABLE-SPECIFIC MODEL CLASS
 # ============================================================
 
-class ${camel_case(table_name)}(BaseModel):
+class ${camel_case(table_name)}(${_base_model_class_name}):
     """
     Model for ${table_name} table.
 

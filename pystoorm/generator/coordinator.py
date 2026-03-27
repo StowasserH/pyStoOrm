@@ -213,6 +213,28 @@ class Coordinator(object):
             else:
                 print(rendered)
 
+    def _get_base_class_for_template(self, template_to, base_classes_config):
+        """Determine base class configuration based on template output path.
+
+        Args:
+            template_to: Template output path pattern
+            base_classes_config: Base classes configuration dict
+
+        Returns:
+            dict: Base class info for model, repository, builder
+        """
+        result = {}
+
+        # Determine template type from output path
+        if 'model' in template_to:
+            result['model'] = base_classes_config.get('model', {})
+        if 'repositor' in template_to:
+            result['repository'] = base_classes_config.get('repository', {})
+        if 'builder' in template_to or 'sqlbuilder' in template_to:
+            result['builder'] = base_classes_config.get('builder', {})
+
+        return result
+
     def _generate_table_mode(self, template, template_config, output_path):
         """Generate code in table mode (once per table per connection).
 
@@ -221,6 +243,9 @@ class Coordinator(object):
             template_config: Template configuration dict
             output_path: Output path template (or None)
         """
+        # Load base classes configuration
+        base_classes_config = self.config.get('base_classes', {})
+
         for connection in self.config['connections']:
             schema = connection.get('parsedSchema')
             if not schema:
@@ -231,6 +256,10 @@ class Coordinator(object):
 
             for table_idx, table_name in enumerate(schema.table_names):
                 table = schema.tables[table_name]
+
+                # Determine which base class to use based on template type
+                template_to = template_config.get('to', '')
+                base_class_info = self._get_base_class_for_template(template_to, base_classes_config)
 
                 # Create context
                 buf = StringIO()
@@ -244,7 +273,13 @@ class Coordinator(object):
                     _first_table=(table_idx == 0),
                     _last_table=(table_idx == len(schema.table_names) - 1),
                     _table_index=table_idx,
-                    _first_table_name=first_table_name
+                    _first_table_name=first_table_name,
+                    _base_model_class_name=base_class_info.get('model', {}).get('class_name', 'BaseModel'),
+                    _base_model_import_from=base_class_info.get('model', {}).get('import_from'),
+                    _base_repository_class_name=base_class_info.get('repository', {}).get('class_name', 'BaseRepository'),
+                    _base_repository_import_from=base_class_info.get('repository', {}).get('import_from'),
+                    _base_builder_class_name=base_class_info.get('builder', {}).get('class_name', 'BaseBuilder'),
+                    _base_builder_import_from=base_class_info.get('builder', {}).get('import_from'),
                 )
 
                 # Render template
