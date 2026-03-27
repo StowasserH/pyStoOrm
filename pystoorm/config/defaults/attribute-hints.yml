@@ -1,0 +1,27 @@
+# pyStoOrm Attribute Hints (Global Defaults)
+# Defines which column should be used as the "display attribute" (attitüde)
+# Used for dropdowns, lists, and string representations of objects
+
+attribute_hints:
+  # Default heuristics: try these columns in order
+  # The first matching column in a table becomes its "main attribute"
+  defaults:
+    - "name"                         # "name" column preferred
+    - "title"
+    - "{table_singular}_name"        # e.g., "user_name" if table is "users"
+    - "{table_singular}_title"
+    - "description"
+    - "label"
+
+  # Table-specific overrides: which columns to prefer for specific tables
+  overrides:
+    # Example: for 'users' table, prefer these columns
+    # users:
+    #   - "last_name"
+    #   - "first_name"
+    #   - "email"
+
+  # Fallback: if no column matches, use these
+  fallback:
+    - "id"                          # Show ID if nothing else matches
+    - "{primary_key}"

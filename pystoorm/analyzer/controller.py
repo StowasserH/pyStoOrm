@@ -5,8 +5,8 @@ __author__ = "Harald Stowasser"
 # CREATE USER 'pystoorm'@'localhost' IDENTIFIED BY 'pystoormpw';
 import importlib
 from clint.textui import puts, colored
-from database.connector import Connector
-from parser import Parser
+from pystoorm.database.connector import Connector
+from .parser import Parser
 
 
 class Controller(object):
@@ -19,11 +19,15 @@ class Controller(object):
         if len(connector) > 0:
             path = connector.split('.')
             if len(path) == 1:
-                return 'database.' + connector.lower(), connector
+                return 'pystoorm.database.' + connector.lower(), connector
             else:
-                return '.'.join(path[0:-1]), path[-1]
+                # Prepend 'pystoorm.' if not already present
+                full_path = '.'.join(path[0:-1])
+                if not full_path.startswith('pystoorm.'):
+                    full_path = 'pystoorm.' + full_path
+                return full_path, path[-1]
 
-        return 'database.nullconnector', 'NullConnector'
+        return 'pystoorm.database.nullconnector', 'NullConnector'
 
     def conector_fabrik(self, connector):
         try:

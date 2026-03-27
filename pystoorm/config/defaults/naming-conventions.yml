@@ -1,0 +1,63 @@
+# pyStoOrm Naming Conventions (Global Defaults)
+# Defines how primary keys, foreign keys, and other columns are named/identified
+
+naming:
+  # PRIMARY KEY Configuration
+  primary_key:
+    # Regex patterns that identify a primary key in the database
+    patterns:
+      - "^id$"
+      - "^pk_.*"
+      - "^{table_singular}_id$"
+      - "^{table_singular}_pk$"
+    # How to refer to the primary key in generated code
+    code_name_pattern: "{table_singular}_id"
+
+  # FOREIGN KEY Configuration
+  foreign_key:
+    # Regex patterns that identify a foreign key column
+    patterns:
+      - "^fk_.*"
+      - "^{other_table_singular}_id$"
+      - "^{other_table}_id$"
+    code_name_pattern: "{other_table_singular}_id"
+
+  # FORWARD KEY Configuration (references to other tables, but not structural FKs)
+  forward_key:
+    patterns:
+      - ".*_ref$"
+      - ".*_reference$"
+    code_name_pattern: "{column_base}_ref"
+
+  # TABLE NAMING
+  table:
+    singular_form_in_code: true  # Use singular form in generated Python classes
+    case_in_code: "PascalCase"   # PascalCase, camelCase, snake_case
+    case_in_db: "snake_case"     # How table names appear in database
+
+  # COLUMN NAMING
+  column:
+    case_in_code: "snake_case"   # How columns are named in generated code
+    case_in_db: "snake_case"     # How columns appear in database
+
+  # SPECIAL COLUMN TYPES (semantic identification)
+  special_columns:
+    created_at:
+      patterns: ["created_at", "createdAt", "creation_date", "date_created"]
+      python_type: "datetime"
+
+    updated_at:
+      patterns: ["updated_at", "updatedAt", "last_modified", "modified_at", "modified_date"]
+      python_type: "datetime"
+
+    deleted_at:
+      patterns: ["deleted_at", "deletedAt", "deletion_date"]
+      python_type: "datetime"
+
+    version:
+      patterns: ["version", "revision", "v"]
+      python_type: "int"
+
+    is_active:
+      patterns: ["is_active", "isActive", "active", "enabled"]
+      python_type: "bool"

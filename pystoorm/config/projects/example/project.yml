@@ -1,0 +1,75 @@
+# pyStoOrm Project Configuration (Example)
+# This file contains project-specific settings and database connection details
+
+# DATABASE CONNECTION
+connections:
+  - connection: example_db
+    host: 127.0.0.1
+    port: 3306
+    username: root
+    password: changeme
+    database: example_database
+    connector: database.mysqlconnector.MysqlConnector
+    # Alternative password sources (uncomment one):
+    # password_from_env: DB_PASSWORD           # Use environment variable
+    # password_from_file: ~/.credentials/db.pass  # Read from file
+
+# PROJECT PATHS
+project_root: ../../../tests/sampleproject
+output_dir: ${project_root}/generated/orm
+
+# TABLES TO GENERATE
+# Uncomment to selectively include/exclude tables
+# tables:
+#   include: ["users", "orders", "products"]  # null = all tables
+#   exclude: ["audit_log", "temp_*"]          # Wildcard patterns supported
+
+# OVERRIDE NAMING CONVENTIONS (optional)
+# Only override what differs from defaults
+# naming:
+#   primary_key:
+#     patterns:
+#       - "^id$"
+#       - "^pk_{table_singular}$"
+#   table:
+#     case_in_code: "snake_case"   # Use snake_case for class names
+
+# OVERRIDE STYLE GUIDE (optional)
+# Only override what differs from defaults
+# style:
+#   class_naming:
+#     suffix: "Entity"              # "UserEntity" instead of "UserModel"
+#   formatting:
+#     indent: 2                      # Use 2 spaces instead of 4
+
+# OVERRIDE ATTRIBUTE HINTS (optional)
+# Only override what differs from defaults
+# attribute_hints:
+#   defaults:
+#     - "label"
+#     - "name"
+#   overrides:
+#     users:
+#       - "full_name"
+#       - "email"
+#     products:
+#       - "product_name"
+#       - "sku"
+
+# OVERRIDE OUTPUT TEMPLATES (optional)
+# Uncomment templates you want to use
+# output:
+#   - from: ./pystoorm/templates/python/model.py
+#     to: ${output_dir}/models/[table].py
+#     enabled: true
+#     modus: table
+#
+#   - from: ./pystoorm/templates/python/repository.py.template
+#     to: ${output_dir}/repositories/[table]_repository.py
+#     enabled: true
+#     modus: table
+#
+#   - from: ./pystoorm/templates/erd/graphviz.template
+#     to: ${output_dir}/erd/schema.dot
+#     enabled: true
+#     modus: schema
