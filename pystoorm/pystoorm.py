@@ -5,7 +5,6 @@ Select name FROM ORM where rating='best'
 """
 __author__ = "Harald Stowasser"
 
-import os
 import sys
 import logging
 from clint.textui import puts, colored

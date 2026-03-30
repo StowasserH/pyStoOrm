@@ -11,4 +11,3 @@ class Schema(object):
         self.name = name
         self.table_names = table_names
         self.tables = {}
-

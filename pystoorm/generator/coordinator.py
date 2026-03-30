@@ -115,71 +115,59 @@ class Coordinator(object):
             return match.group(1)
         return None
 
-    def generate(self):
-        """Generate code from all configured templates.
+    def _validate_template_path(self, template_from):
+        """Validate and resolve template path."""
+        if not template_from:
+            logger.warning("Template config missing 'from' path")
+            return None
 
-        Iterates through templates in config['output']:
-        - Skips templates with enabled=False
-        - Checks template modus (schema or table)
-        - Renders with appropriate context
-        - Saves to output file or prints to stdout
-        """
+        if not os.path.isabs(template_from) and os.path.isfile(template_from):
+            template_from = os.path.abspath(template_from)
+
+        if not os.path.isfile(template_from):
+            puts(colored.red(f'Template file not found: {template_from}'))
+            logger.error(f"Template file not found: {template_from}")
+            return None
+
+        return template_from
+
+    def _process_template(self, template_config):
+        """Process a single template configuration."""
+        if not template_config.get('enabled', True):
+            logger.debug(f"Template disabled: {template_config['from']}")
+            return
+
+        template_from = self._validate_template_path(template_config.get('from'))
+        if not template_from:
+            return
+
+        template_to = template_config.get('to')
+
+        try:
+            mako_template = Template(filename=template_from)
+            modus = self._get_template_modus(mako_template.source) or "schema"
+            logger.debug(f"Rendering template {template_from} in {modus} mode")
+
+            if modus == "schema":
+                self._generate_schema_mode(mako_template, template_config, template_to)
+            elif modus == "table":
+                self._generate_table_mode(mako_template, template_config, template_to)
+            else:
+                logger.warning(f"Unknown modus '{modus}' in template {template_from}")
+
+        except Exception as e:
+            puts(colored.red(f'Error generating from template {template_from}: {e}'))
+            logger.error(f"Template generation error: {e}", exc_info=True)
+            raise
+
+    def generate(self):
+        """Generate code from all configured templates."""
         if 'output' not in self.config:
             logger.warning("No 'output' templates configured")
             return
 
         for template_config in self.config['output']:
-            # Check if template is enabled
-            if not template_config.get('enabled', True):
-                logger.debug(f"Template disabled: {template_config['from']}")
-                continue
-
-            template_from = template_config.get('from')
-            template_to = template_config.get('to')
-
-            if not template_from:
-                logger.warning("Template config missing 'from' path")
-                continue
-
-            # Convert relative paths to absolute
-            if not os.path.isabs(template_from):
-                # Try relative to current working directory first
-                if os.path.isfile(template_from):
-                    template_from = os.path.abspath(template_from)
-                else:
-                    puts(colored.red(f'Template file not found: {template_from}'))
-                    logger.error(f"Template file not found: {template_from}")
-                    continue
-
-            # Check if template file exists
-            if not os.path.isfile(template_from):
-                puts(colored.red(f'Template file not found: {template_from}'))
-                logger.error(f"Template file not found: {template_from}")
-                continue
-
-            try:
-                # Load template
-                mako_template = Template(filename=template_from)
-                modus = self._get_template_modus(mako_template.source)
-
-                if not modus:
-                    logger.warning(f"Template missing modus comment: {template_from}")
-                    modus = "schema"  # Default to schema mode
-
-                logger.debug(f"Rendering template {template_from} in {modus} mode")
-
-                # Generate based on modus
-                if modus == "schema":
-                    self._generate_schema_mode(mako_template, template_config, template_to)
-                elif modus == "table":
-                    self._generate_table_mode(mako_template, template_config, template_to)
-                else:
-                    logger.warning(f"Unknown modus '{modus}' in template {template_from}")
-
-            except Exception as e:
-                puts(colored.red(f'Error generating from template {template_from}: {e}'))
-                logger.error(f"Template generation error: {e}", exc_info=True)
-                raise
+            self._process_template(template_config)
 
     def _generate_schema_mode(self, template, template_config, output_path):
         """Generate code in schema mode (once per connection).
@@ -301,4 +289,3 @@ class Coordinator(object):
                         logger.info(f"Generated: {expanded_path}")
                 else:
                     print(rendered)
-

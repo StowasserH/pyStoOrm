@@ -17,7 +17,6 @@ import sqlite3
 import tempfile
 import os
 import shutil
-from pathlib import Path
 
 from pystoorm.config.loader import ConfigLoader
 from pystoorm.analyzer.controller import Controller

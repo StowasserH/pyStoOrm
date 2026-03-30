@@ -27,7 +27,7 @@ echo ""
 
 # Run pyStoOrm
 echo "[2/2] Generating ORM code..."
-python3 "$PROJECT_ROOT/pyStoOrm.py" "$PROJECT_YML"
+PYTHONPATH="$PROJECT_ROOT:$PYTHONPATH" python3 "$PROJECT_ROOT/pyStoOrm.py" "$PROJECT_YML"
 echo ""
 
 # Show structure

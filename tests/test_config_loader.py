@@ -180,7 +180,7 @@ class TestConfigHierarchy(unittest.TestCase):
         if os.path.exists(project_file):
             loader = ConfigLoader()
             loader.load_defaults()
-            defaults_config = loader.get_config().copy()
+            defaults_config = loader.get_config().copy()  # noqa: F841
 
             loader2 = ConfigLoader()
             loader2.load_defaults().load_project(project_file)

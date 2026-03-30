@@ -20,13 +20,13 @@ class PostgresqlConnector(Connector):
     args = None
     modded_attr = {"user": "username", "passwd": "password", "db": "database", "connect_timeout": "connection_timeout"}
 
-    allowed_attributes = ("username", "password", "database", "host", "port", "unix_socket"
-                          , "auth_plugin", "use_unicode", "charset", "collation", "autocommit", "time_zone"
-                          , "sql_mod", "get_warnings", "raise_on_warnings", "connection_timeout"
-                          , "client_flags", "buffered", "raw", "consume_results", "ssl_ca", "ssl_cert", "ssl_disabled"
-                          , "ssl_key", "ssl_verify_cert", "ssl_verify_identity", "force_ipv6", "dsn", "pool_name"
-                          , "pool_size", "pool_reset_session", "compress", "converter_class", "failover"
-                          , "option_files", "option_groups", "allow_local_infile", "use_pure")
+    allowed_attributes = ("username", "password", "database", "host", "port", "unix_socket",
+                          "auth_plugin", "use_unicode", "charset", "collation", "autocommit", "time_zone",
+                          "sql_mod", "get_warnings", "raise_on_warnings", "connection_timeout",
+                          "client_flags", "buffered", "raw", "consume_results", "ssl_ca", "ssl_cert", "ssl_disabled",
+                          "ssl_key", "ssl_verify_cert", "ssl_verify_identity", "force_ipv6", "dsn", "pool_name",
+                          "pool_size", "pool_reset_session", "compress", "converter_class", "failover",
+                          "option_files", "option_groups", "allow_local_infile", "use_pure")
 
     def get_cursor(self):
         if self.con is None:
@@ -69,7 +69,7 @@ class PostgresqlConnector(Connector):
 
     def get_schema(self):
         cur = self.get_cursor()
-        anz = cur.execute("SHOW TABLES")
+        cur.execute("SHOW TABLES")
         tab_namen = [item[0] for item in cur.fetchall()]
         cur.close()
         return Schema(self.config['database'], tab_namen)
@@ -83,8 +83,10 @@ class PostgresqlConnector(Connector):
 
     def get_column(self, table, column):
         cur = self.get_cursor()
-        tupple = "DATA_TYPE, IS_NULLABLE, COLUMN_KEY,COLUMN_DEFAULT, CHARACTER_MAXIMUM_LENGTH, NUMERIC_PRECISION"
-        querry = "SELECT " + tupple + " FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = %s AND table_schema = %s AND column_name = %s;"
+        tupple = ("DATA_TYPE, IS_NULLABLE, COLUMN_KEY,COLUMN_DEFAULT, "
+                  "CHARACTER_MAXIMUM_LENGTH, NUMERIC_PRECISION")
+        querry = ("SELECT " + tupple + " FROM INFORMATION_SCHEMA.COLUMNS "
+                  "WHERE table_name = %s AND table_schema = %s AND column_name = %s;")
         cur.execute(querry, (table, self.config['database'], column))
         result = cur.fetchall()
         if not result:

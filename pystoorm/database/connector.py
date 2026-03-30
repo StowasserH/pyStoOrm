@@ -10,7 +10,7 @@ class Connector(object):
     config = None
 
     def __init__(self, config=None):
-        if config != None:
+        if config is not None:
             self.set_config(config)
 
     def set_config(self, config):

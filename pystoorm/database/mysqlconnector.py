@@ -3,7 +3,6 @@
 """connects to a db"""
 __author__ = "Harald Stowasser"
 import logging
-from clint.textui import puts, colored
 from .connector import Connector
 import mysql.connector
 from .table import Table
@@ -19,7 +18,7 @@ class MysqlConnector(Connector):
     con = None
 
     def get_cursor(self):
-        if self.con == None:
+        if self.con is None:
             self.connect()
         return self.con.cursor()
 
@@ -39,7 +38,7 @@ class MysqlConnector(Connector):
 
     def get_schema(self):
         cur = self.get_cursor()
-        anz = cur.execute("SHOW TABLES")
+        cur.execute("SHOW TABLES")
         tab_namen = [item[0] for item in cur.fetchall()]
         cur.close()
         return Schema(self.config['database'], tab_namen)
@@ -53,8 +52,10 @@ class MysqlConnector(Connector):
 
     def get_column(self, table, column):
         cur = self.get_cursor()
-        tupple = "DATA_TYPE, IS_NULLABLE, COLUMN_KEY,COLUMN_DEFAULT, CHARACTER_MAXIMUM_LENGTH, NUMERIC_PRECISION"
-        querry = "SELECT " + tupple + " FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = %s AND table_schema = %s AND column_name = %s;"
+        tupple = ("DATA_TYPE, IS_NULLABLE, COLUMN_KEY,COLUMN_DEFAULT, "
+                  "CHARACTER_MAXIMUM_LENGTH, NUMERIC_PRECISION")
+        querry = ("SELECT " + tupple + " FROM INFORMATION_SCHEMA.COLUMNS "
+                  "WHERE table_name = %s AND table_schema = %s AND column_name = %s;")
         cur.execute(querry, (table, self.config['database'], column))
         result = cur.fetchall()
         if not result:

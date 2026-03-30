@@ -15,6 +15,6 @@ setup(
     ],
     author='Harald Stowasser',
     author_email='pystoorm@stowasser.tv',
-    keywords=['orm','database'],
+    keywords=['orm', 'database'],
     url='https://github.com/StowasserH/pystoorm'
 )

@@ -13,7 +13,6 @@ Loads and merges configuration files in the following order:
 import os
 import yaml
 import logging
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
