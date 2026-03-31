@@ -1,0 +1,13 @@
+include README.md
+include LICENSE
+include requirements.txt
+recursive-include docs *
+recursive-include tests *
+recursive-include pystoorm/config *.md
+recursive-include pystoorm/database *.md
+include ARCHITECTURE.md
+include CONFIG_QUICK_START.md
+include CONFIGURATION_STRATEGY.md
+include IMPLEMENTATION_SUMMARY.md
+include INTEGRATION_GUIDE.md
+include strategie.md
