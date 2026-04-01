@@ -1,0 +1,41 @@
+{
+  "name": "pystoorm-middleware-demo",
+  "version": "0.1.0",
+  "description": "Complete example project demonstrating pyStoOrm Middleware with REST API",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "dev": "node --loader ts-node/esm --input-type=module src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "type-check": "tsc --noEmit",
+    "generate": "python -m pystoorm project.yml"
+  },
+  "keywords": [
+    "pystoorm",
+    "middleware",
+    "rest-api",
+    "fastify",
+    "postgresql",
+    "typescript"
+  ],
+  "author": "pyStoOrm Contributors",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^4.0.0",
+    "@fastify/cors": "^8.0.0",
+    "@fastify/helmet": "^11.0.0",
+    "pg": "^8.10.0",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "@types/pg": "^8.10.0",
+    "ts-node": "^10.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

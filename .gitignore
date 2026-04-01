@@ -104,3 +104,13 @@ ENV/
 background
 
 strategie.md
+
+# Generated code
+tests/middleware-demo/src/generated/
+tests/middleware-demo/dist/
+tests/middleware-demo/node_modules/
+tests/middleware-demo/package-lock.json
+tests/middleware-demo/.env
+
+# Separate middleware package (not part of this repo)
+pystoorm-middleware/

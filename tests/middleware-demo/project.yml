@@ -1,0 +1,81 @@
+# pyStoOrm Configuration for Middleware Demo
+# This configuration generates TypeScript models, repositories, services, DTOs, and controllers
+
+project_root: /home/stowasserh/Nextcloud/share/work/pyStoOrm/tests/middleware-demo
+output_dir: /home/stowasserh/Nextcloud/share/work/pyStoOrm/tests/middleware-demo/src/generated
+
+connections:
+  - connection: classicmodels
+    connector: pystoorm.database.postgresqlconnector.PostgresqlConnector
+    host: localhost
+    port: 5432
+    database: pystoorm_db
+    user: pystoorm_user
+    password: pystoorm_password
+
+# Code generation templates
+output:
+  # TypeScript Models
+  - from: /home/stowasserh/Nextcloud/share/work/pyStoOrm/pystoorm/templates/typescript/model.ts.template
+    to: src/generated/models/[table].model.ts
+    enabled: true
+    modus: table
+
+  # TypeScript Repositories
+  - from: /home/stowasserh/Nextcloud/share/work/pyStoOrm/pystoorm/templates/typescript/repository.ts.template
+    to: src/generated/repositories/[table].repository.ts
+    enabled: true
+    modus: table
+
+  # TypeScript Services
+  - from: /home/stowasserh/Nextcloud/share/work/pyStoOrm/pystoorm/templates/typescript/service.ts.template
+    to: src/generated/services/[table].service.ts
+    enabled: true
+    modus: table
+
+  # TypeScript DTOs
+  - from: /home/stowasserh/Nextcloud/share/work/pyStoOrm/pystoorm/templates/typescript/dto.ts.template
+    to: src/generated/dto/[table].dto.ts
+    enabled: true
+    modus: table
+
+  # TypeScript Controllers
+  - from: /home/stowasserh/Nextcloud/share/work/pyStoOrm/pystoorm/templates/typescript/controller.ts.template
+    to: src/generated/controllers/[table].controller.ts
+    enabled: true
+    modus: table
+
+# Base classes configuration (optional)
+# If you want to use custom base classes, uncomment and configure:
+#
+# base_classes:
+#   model:
+#     class_name: MyBaseModel
+#     import_from: custom/my-model
+#   repository:
+#     class_name: MyBaseRepository
+#     import_from: custom/my-repository
+#   service:
+#     class_name: MyBaseService
+#     import_from: custom/my-service
+
+# Column naming conventions (optional)
+# Customize how columns are named in generated code:
+#
+# naming_conventions:
+#   camel_case: true  # customerName instead of CUSTOMER_NAME
+#   snake_case: false  # For attributes in Python
+
+# Attribute hints (optional)
+# Configure which columns are displayed as the "attitude" column
+#
+# attribute_hints:
+#   customers:
+#     display: customerName
+#   orders:
+#     display: orderNumber
+
+logging:
+  level: INFO
+  output: stdout
+  format: plain

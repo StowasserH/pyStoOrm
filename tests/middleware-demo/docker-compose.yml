@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: pystoorm_postgres
+    environment:
+      POSTGRES_USER: pystoorm_user
+      POSTGRES_PASSWORD: pystoorm_password
+      POSTGRES_DB: pystoorm_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pystoorm_user -d pystoorm_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pystoorm_net
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pystoorm_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_PROXY_X_FOR_COUNT: 1
+      PGADMIN_CONFIG_PROXY_X_PROTO_COUNT: 1
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - pystoorm_net
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  pystoorm_net:
+    driver: bridge

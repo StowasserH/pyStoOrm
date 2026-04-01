@@ -1,0 +1,61 @@
+## modus: table
+/**
+ * Model for ${table_name} table
+ */
+
+% if not _first_table:
+// Import BaseModel from first table
+import { BaseModel } from './${underscored(_first_table_name)}.model';
+% endif
+
+% if _first_table:
+export class BaseModel {
+  static _COLUMNS: string[] = [];
+  static _PRIMARY_KEY: string | null = null;
+  protected _dirty: boolean = false;
+  protected _modifiedColumns: Record<string, any> = {};
+
+  /**
+   * Create instance from database row
+   */
+  static _fromRow<T extends BaseModel>(this: new () => T, row: Record<string, any>): T {
+    const instance = new this();
+    instance._modifiedColumns = { ...row };
+    instance._dirty = false;
+    return instance;
+  }
+
+  get isDirty(): boolean {
+    return this._dirty;
+  }
+
+  get modifiedColumns(): Record<string, any> {
+    return { ...this._modifiedColumns };
+  }
+}
+% endif
+
+<%
+# Find primary key
+pk_col = None
+for col in table.columns.values():
+    if col.key == 'PRI':
+        pk_col = col.name
+        break
+
+# Format for TypeScript
+if pk_col:
+    pk_col_ts = "'" + pk_col + "'"
+else:
+    pk_col_ts = "null"
+%>
+
+export class ${camel_case(table_name)} extends BaseModel {
+  static _COLUMNS = [
+% for column in table.columns.values():
+    '${column.name}',
+% endfor
+  ];
+
+  static _PRIMARY_KEY = ${pk_col_ts};
+}

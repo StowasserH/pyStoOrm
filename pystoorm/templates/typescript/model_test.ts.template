@@ -1,0 +1,20 @@
+## modus: table
+/**
+ * Simple test model for ${table_name}
+ */
+
+% if _first_table:
+export class BaseModel {
+  protected _dirty: boolean = false;
+
+  get isDirty(): boolean {
+    return this._dirty;
+  }
+}
+% endif
+
+export class ${camel_case(table_name)} extends BaseModel {
+  constructor() {
+    super();
+  }
+}
