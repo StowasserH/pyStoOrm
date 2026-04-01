@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Database-first code generator for any language, framework, and pattern"
 readme = "README.md"
 requires-python = ">=3.5"
-license = "MIT"
+license = {file = "LICENSE"}
 authors = [
     {name = "Harald Stowasser", email = "pystoorm@stowasser.tv"}
 ]
