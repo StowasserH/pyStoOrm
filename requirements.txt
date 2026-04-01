@@ -1,5 +1,6 @@
 clint>=0.5.1
 mysql-connector-python>=8.0.33
+psycopg2-binary>=2.9.0
 PyYAML>=6.0
 Mako>=1.2.4
 pytest

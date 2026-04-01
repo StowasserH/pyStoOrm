@@ -209,7 +209,7 @@ class Coordinator(object):
             base_classes_config: Base classes configuration dict
 
         Returns:
-            dict: Base class info for model, repository, builder
+            dict: Base class info for model, repository, service, builder
         """
         result = {}
 
@@ -218,6 +218,8 @@ class Coordinator(object):
             result['model'] = base_classes_config.get('model', {})
         if 'repositor' in template_to:
             result['repository'] = base_classes_config.get('repository', {})
+        if 'service' in template_to:
+            result['service'] = base_classes_config.get('service', {})
         if 'builder' in template_to or 'sqlbuilder' in template_to:
             result['builder'] = base_classes_config.get('builder', {})
 
@@ -266,6 +268,8 @@ class Coordinator(object):
                     _base_model_import_from=base_class_info.get('model', {}).get('import_from'),
                     _base_repository_class_name=base_class_info.get('repository', {}).get('class_name', 'BaseRepository'),
                     _base_repository_import_from=base_class_info.get('repository', {}).get('import_from'),
+                    _base_service_class_name=base_class_info.get('service', {}).get('class_name', 'BaseService'),
+                    _base_service_import_from=base_class_info.get('service', {}).get('import_from'),
                     _base_builder_class_name=base_class_info.get('builder', {}).get('class_name', 'BaseBuilder'),
                     _base_builder_import_from=base_class_info.get('builder', {}).get('import_from'),
                 )

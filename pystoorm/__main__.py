@@ -84,7 +84,9 @@ def _resolve_config_paths(config, config_dir):
 
     if 'connections' in config:
         for conn in config['connections']:
-            if 'database' in conn:
+            # Only resolve 'database' as a path for SQLite (file-based databases)
+            # For PostgreSQL/MySQL, 'database' is a database name, not a file path
+            if 'database' in conn and 'sqliteconnector' in conn.get('connector', '').lower():
                 conn['database'] = resolve_path(conn['database'])
 
     return config

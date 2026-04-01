@@ -214,7 +214,23 @@ database: ./myapp.db           # or ':memory:' for in-memory
 - Python 3.5+
 - Your database client library (installed automatically)
 
+### From PyPI (Recommended)
+
+The easiest way to get started:
+
+```bash
+pip install pystoorm
+```
+
+Then create your configuration file and run:
+
+```bash
+python3 pystoorm.py project.yml
+```
+
 ### From Source
+
+For development or contributing:
 
 ```bash
 # Clone repository
@@ -234,6 +250,10 @@ python3 -m pytest tests/ -v
 sudo apt-get update
 sudo apt-get install python3 python3-pip python3-dev
 
+# Option 1: From PyPI (recommended)
+pip install pystoorm
+
+# Option 2: From source
 git clone https://github.com/StowasserH/pystoorm.git
 cd pystoorm
 pip install -e .
