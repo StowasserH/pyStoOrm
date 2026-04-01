@@ -10,4 +10,3 @@ include CONFIG_QUICK_START.md
 include CONFIGURATION_STRATEGY.md
 include IMPLEMENTATION_SUMMARY.md
 include INTEGRATION_GUIDE.md
-include strategie.md
