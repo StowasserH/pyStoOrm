@@ -148,7 +148,7 @@ All without fighting the ORM abstraction.
 ### 1. Install pyStoOrm
 
 ```bash
-pip install -e .
+pip install pystoorm
 ```
 
 ### 2. Create Your Configuration
