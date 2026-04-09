@@ -60,7 +60,11 @@
 - Python 3.5+ compatible
 
 ---
-
+## Naminmg
+The name pyStoOrm is intentionally stylized. The double “o” is pronounced like the German umlaut “u” (as in the word Sturm), so pyStoOrm is spoken as “pySturm”.
+A rough phonetic approximation would be: pie-shtoorm (with the “oo” sounding like “u” in “turn”).
+The name stoorm itself is an anagram of Simple Template Oriented ORM, reflecting the core idea behind the project.
+---
 ## 📋 Generate Anything from Your Database
 
 One database. Many outputs. One configuration file.
